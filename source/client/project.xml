@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+
+	<meta title="BattleWar" package="com.Delphic.BattleWar" version="1.0.0" company="Delphic" />
+	<app main="Main" path="../../export" file="battlewar" />
+
+	<window fps="60" orientation="landscape" hardware="true"/>
+	<window width="1136" height="640"/>
+
+	<source path="source" />
+    <source path="assets/fonts" />
+
+	<haxelib name="actuate" />
+	<haxelib name="openfl" />
+	<haxelib name="format" />
+	<haxelib name="swf" />
+
+    <icon path="assets/openfl.svg" />
+	<assets path="assets" exclude="openfl.svg" />
+	<assets path="assets/swf" rename="swf" include="*" />
+    <assets path="assets/img" rename="img" include="*" />
+
+</project>

@@ -20,7 +20,6 @@ class AbilityHandler
     static public var dispatcher:EventDispatcher;
 
     private var abilities:Array<Ability>;
-    private var enemyPositions:Array<Point>;
 
 	public function new()
 	{
@@ -31,7 +30,6 @@ class AbilityHandler
     {
         dispatcher = new EventDispatcher();
         abilities = [];
-        EventBus.subscribe(EventTypes.UpdateAdjacentEnemies, updateAdjacentEnemies);
         EventBus.subscribe(EventTypes.UpdateAbilities, updateAbilities);
     }
 
@@ -60,7 +58,7 @@ class AbilityHandler
 
         for(ability in abilities)
         {
-            if(ability.characterId == aCharacterId)
+            if(ability.ownerId == aCharacterId)
             {
                 a.push(ability);
             }
@@ -80,27 +78,20 @@ class AbilityHandler
         }
     }
 
-    public function updateAdjacentEnemies(aEnemyPositions:Array<Point>):Void
-    {
-        enemyPositions = aEnemyPositions;
-    }
-
     public function updateAbilities(aData:Array<Dynamic>):Void
     {
-        var characterId:Int = aData[0];
-        var characterPosition:Point = aData[1];
+        var ownerId:Int = aData[0];
+        var ownerPosition:Point = aData[1];
+        var positions:Array<Point> = aData[2];
 
         for (ability in abilities)
         {
-            if(ability.characterId == characterId)
-            {
-                ability.enabled = false;
-            }
+            ability.enabled = false;
         }
 
         for (ability in abilities)
         {
-            if(ability.characterId == characterId)
+            if(ability.ownerId == ownerId)
             {
                 if(ability.targetType == AbilityTargetType.Self)
                 {
@@ -109,9 +100,9 @@ class AbilityHandler
 
                 if(ability.targetType == AbilityTargetType.Enemy)
                 {
-                    for (enemyPosition in enemyPositions)
+                    for (position in positions)
                     {
-                        var distance:Int = TileHelper.getDistanceBetweenPoint(characterPosition, enemyPosition);
+                        var distance:Int = TileHelper.getDistanceBetweenPoint(ownerPosition, position);
 
                         if(ability.range >= distance)
                         {
@@ -124,10 +115,7 @@ class AbilityHandler
 
         for (ability in abilities)
         {
-            if(ability.characterId == characterId)
-            {
-                EventBus.dispatch(EventTypes.UpdateAbilityIcon, [ability.id, ability.enabled]);
-            }
+            EventBus.dispatch(EventTypes.UpdateAbility, [ability.id, ability.enabled]);
         }
     }
 

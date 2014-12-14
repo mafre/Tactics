@@ -18,7 +18,6 @@ class CharacterHandler
 	public function new()
 	{
         characters = [];
-        EventBus.subscribe(EventTypes.CharacterKilled, characterKilled);
 	};
 
     public function addCharacter(aCharacter:CharacterModel):Void
@@ -40,14 +39,17 @@ class CharacterHandler
         return null;
     }
 
-    private function characterKilled(aData:Array<Dynamic>):Void
+    public function resetUsersCharacters(aUserId:String):Void
     {
-        var characterId:Int = aData[0];
-        var character:CharacterModel = getCharacter(characterId);
-        characters.remove(character);
+        var a:Array<CharacterModel> = getUsersCharacters(aUserId);
+
+        for(character in a)
+        {
+            character.reset();
+        }
     }
 
-    public function roundComplete(aUserId:String):Void
+    public function disableUser(aUserId:String):Void
     {
         var a:Array<CharacterModel> = getUsersCharacters(aUserId);
 
@@ -57,7 +59,7 @@ class CharacterHandler
         }
     }
 
-    public function startRound(aUserId:String):Void
+    public function enableUser(aUserId:String):Void
     {
         var a:Array<CharacterModel> = getUsersCharacters(aUserId);
 

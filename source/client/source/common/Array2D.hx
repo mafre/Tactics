@@ -70,6 +70,25 @@ class Array2D
         return a;
     }
 
+    public function getAllOccupiedPositionsExcept(aValue:Int):Array<Point>
+    {
+        var a:Array<Point> = [];
+
+        for (i in 0 ... width)
+        {
+            for (j in 0 ... height)
+            {
+                if(data[i][j] != 0 && data[i][j] != aValue)
+                {
+                    var p:Point = new Point(i, j);
+                    a.push(p);
+                }
+            }
+        }
+
+        return a;
+    }
+
     public function find(aValue:Int):Point
     {
         for (i in 0 ... width)
@@ -94,6 +113,16 @@ class Array2D
         {
             set(cast(currentPos.x, Int), cast(currentPos.y, Int), 0);
             set(x, y, aValue);
+        }
+    }
+
+    public function remove(aValue:Int):Void
+    {
+        var currentPos:Point = find(aValue);
+
+        if(currentPos != null)
+        {
+            set(cast(currentPos.x, Int), cast(currentPos.y, Int), 0);
         }
     }
 }

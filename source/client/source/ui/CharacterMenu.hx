@@ -14,6 +14,7 @@ import character.CharacterView;
 import character.CharacterModel;
 import character.CharacterHandler;
 import ui.Ability;
+import common.Button;
 import ability.AbilityHandler;
 import event.EventBus;
 import common.LabelButton;
@@ -41,7 +42,7 @@ class CharacterMenu extends Sprite
         avatar = new Avatar();
         addChild(avatar);
 
-        EventBus.subscribe(EventTypes.SelectCharacter, show);
+        EventBus.subscribe(EventTypes.SetActiveCharacter, show);
         EventBus.subscribe(EventTypes.DeselectCharacter, hide);
         EventBus.subscribe(EventTypes.UpdateCharacterMoves, updateCharacterMoves);
 
@@ -53,9 +54,10 @@ class CharacterMenu extends Sprite
 
     public function show(aData:Array<Dynamic>):Void
     {
-        var characterModel:CharacterModel = CharacterHandler.getInstance().getCharacter(aData[0]);
+        var characterId:Int = aData[0];
+        var characterModel:CharacterModel = CharacterHandler.getInstance().getCharacter(characterId);
 
-        avatar.init(characterModel.id, characterModel.path);
+        avatar.init(characterId, characterModel.path);
 
         health.setPercent(characterModel.getHPPercent());
 
@@ -82,6 +84,8 @@ class CharacterMenu extends Sprite
 
         visible = true;
         resize();
+
+        EventBus.dispatch(EventTypes.CharacterInitialized, characterId);
     };
 
     private function updateCharacterMoves(aMovesText:String):Void

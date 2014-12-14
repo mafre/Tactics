@@ -33,9 +33,8 @@ class UserHandler
 
 	public function new()
 	{
-        EventBus.subscribe(EventTypes.StartGame, startGame);
-        EventBus.subscribe(EventTypes.RoundComplete, roundComplete);
-        EventBus.subscribe(EventTypes.NextRound, nextRound);
+        EventBus.subscribe(EventTypes.EndTurn, endTurn);
+        EventBus.subscribe(EventTypes.NextTurn, nextTurn);
 	};
 
 	public function init():Void
@@ -44,18 +43,10 @@ class UserHandler
 		matchedUsers = new Array<User>();
 	};
 
-    public function startGame():Void
+    public function endTurn():Void
     {
-        CharacterHandler.getInstance().startRound(getCurrentUser().id);
-    }
+        CharacterHandler.getInstance().disableUser(getCurrentUser().id);
 
-    public function roundComplete(aUserId:String):Void
-    {
-        CharacterHandler.getInstance().roundComplete(getCurrentUser().id);
-    }
-
-    public function nextRound(aUserId:String):Void
-    {
         currentUserIndex++;
 
         if(currentUserIndex == getUserOrder().length)
@@ -63,7 +54,13 @@ class UserHandler
             currentUserIndex = 0;
         }
 
-        CharacterHandler.getInstance().startRound(getCurrentUser().id);
+        EventBus.dispatch(EventTypes.ShowNextUser, getCurrentUser().id);
+    }
+
+    public function nextTurn():Void
+    {
+        CharacterHandler.getInstance().enableUser(getCurrentUser().id);
+        CharacterHandler.getInstance().resetUsersCharacters(getCurrentUser().id);
     }
 
     public function getCurrentUser():User
@@ -132,6 +129,11 @@ class UserHandler
 				return aUser;
 			};
 		};
+
+        if(myUser.id == aId)
+        {
+            return myUser;
+        }
 
 		return null;
 	}

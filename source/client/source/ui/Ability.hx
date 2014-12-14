@@ -50,20 +50,23 @@ class Ability extends Sprite
         ok.y = asset.height/2 - ok.height/2;
         ok.visible = false;
 
-        enabled = false;
-
 		addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
 
         EventBus.subscribe(EventTypes.UseAbilityApply, abilityApply);
-        EventBus.subscribe(EventTypes.UpdateAbilityIcon, updateEnabled);
+        EventBus.subscribe(EventTypes.UpdateAbility, updateAbility);
         EventBus.subscribe(EventTypes.UseAbility, useAbility);
+
+        setEnabled(false);
 	}
 
-     private function updateEnabled(aData:Array<Dynamic>):Void
+     private function updateAbility(aData:Array<Dynamic>):Void
     {
-        if(id == aData[0])
+        var aId:Int = aData[0];
+        var enabled:Bool = aData[1];
+
+        if(id == aId)
         {
-            setEnabled(aData[1]);
+            setEnabled(enabled);
         }
     }
 

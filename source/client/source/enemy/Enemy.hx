@@ -17,20 +17,28 @@ import tile.TileBase;
 class Enemy extends TileBase
 {
     public var id:Int;
-    private var enemyType:Int;
-	private var asset:Sprite;
     private var hp:Int;
+    private var str:Int;
+
+    private var enemyType:Int;
+    private var asset:Sprite;
 
 	public function new()
 	{
 		super();
         type = EntityType.ENEMY;
         layer = 3;
+
+        EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
+        EventBus.subscribe(EventTypes.DealDamage, dealDamage);
+        EventBus.subscribe(EventTypes.Defeated, defeated);
 	}
 
     public function setType(aEnemyType:Int):Void
     {
         enemyType = aEnemyType;
+        hp = 1;
+        str = 1;
 
         var typeName:String = "";
 
@@ -40,6 +48,7 @@ class Enemy extends TileBase
 
                 typeName = EnemyType.TROLL;
                 hp = 1;
+                str = 20;
         };
 
         var tile:Sprite = new Image("img/tile/default.png");
@@ -52,19 +61,52 @@ class Enemy extends TileBase
         addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
     }
 
+    private function dealDamage(aData:Array<Dynamic>):Void
+    {
+        var damageDealerId:Int = aData[0];
+        var targetId:Int = aData[1];
+
+        if(id == damageDealerId)
+        {
+            EventBus.dispatch(EventTypes.TakeDamage, [id, targetId, getAtk()]);
+        }
+    }
+
+    public function takeDamage(aData:Array<Dynamic>):Void
+    {
+        var damageDealerId:Int = aData[9];
+        var targetId:Int = aData[1];
+        var damage:Int = aData[2];
+
+        if(id == targetId)
+        {
+            hp -= damage;
+
+            if(hp <= 0)
+            {
+                EventBus.dispatch(EventTypes.Defeated, [id, damageDealerId]);
+                super.remove();
+            }
+        }
+    }
+
+    private function getAtk():Int
+    {
+        return str;
+    }
+
+    private function defeated(aData:Array<Dynamic>):Void
+    {
+        var targetId:Int = aData[0];
+
+        if(id == targetId)
+        {
+            super.remove();
+        }
+    }
+
 	public function mouseDown(e:MouseEvent):Void
 	{
 		dispatchEvent(new Event(EventType.ENEMY_CLICKED));
 	}
-
-    public function takeDamage(aDamage:Int, aCharacterId:Int):Void
-    {
-        hp -= aDamage;
-
-        if(hp <= 0)
-        {
-            super.remove();
-            EventBus.dispatch(EventTypes.EnemyKilled, [id, aCharacterId]);
-        }
-    }
 }

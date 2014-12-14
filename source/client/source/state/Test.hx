@@ -18,12 +18,13 @@ class Test extends State
 
     public override function init(?vars:Dynamic):Void
     {
-        UserHandler.getInstance().setMyUser("1", "username1", 0);
-        UserHandler.getInstance().addMatchedUser("2", "username2", 1);
+        UserHandler.getInstance().setMyUser("1", "Player 1", 0);
+        UserHandler.getInstance().addMatchedUser("2", "Player 2", 1);
 
         CharacterHandler.getInstance().addCharacter(new CharacterModel("1", CharacterType.Rogue));
         CharacterHandler.getInstance().addCharacter(new CharacterModel("1", CharacterType.Knight));
         CharacterHandler.getInstance().addCharacter(new CharacterModel("2", CharacterType.Berserk));
+        CharacterHandler.getInstance().addCharacter(new CharacterModel("2", CharacterType.Blacksmith));
 
         var characters:Array<CharacterModel> = CharacterHandler.getInstance().getAllCharacters();
 
@@ -33,55 +34,62 @@ class Test extends State
             {
                 case CharacterType.Banshee:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.FEAR));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.CURSE));
+                    addAbility(character.id, AbilityType.FEAR);
+                    addAbility(character.id, AbilityType.CURSE);
 
                 case CharacterType.Blacksmith:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.SHIELD));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.HAMMER));
+                    addAbility(character.id, AbilityType.SHIELD, null, AbilityTargetType.Self);
+                    addAbility(character.id, AbilityType.HAMMER, 1);
 
                 case CharacterType.Berserk:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.SHIELD, null, AbilityTargetType.Self));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.SWORD, 1));
+                    addAbility(character.id, AbilityType.SHIELD, null, AbilityTargetType.Self);
+                    addAbility(character.id, AbilityType.SWORD, 1);
 
                 case CharacterType.Priest:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.HEAL));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.BLESS));
+                    addAbility(character.id, AbilityType.HEAL);
+                    addAbility(character.id, AbilityType.BLESS);
 
                 case CharacterType.Rogue:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.KNIFE, 1));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.BOW, 10));
+                    addAbility(character.id, AbilityType.KNIFE, 1);
+                    addAbility(character.id, AbilityType.BOW, 7);
 
                 case CharacterType.Knight:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.TAUNT, 10));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.SHIELD, null, AbilityTargetType.Self));
+                    addAbility(character.id, AbilityType.SWORD, 1);
+                    addAbility(character.id, AbilityType.SHIELD, null, AbilityTargetType.Self);
+                    addAbility(character.id, AbilityType.TAUNT, 7);
 
                 case CharacterType.Monk:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.BEER));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.STAFF));
+                    addAbility(character.id, AbilityType.BEER);
+                    addAbility(character.id, AbilityType.STAFF);
 
                 case CharacterType.Thief:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.STEAL));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.BOW));
+                    addAbility(character.id, AbilityType.STEAL);
+                    addAbility(character.id, AbilityType.BOW);
 
                 case CharacterType.Druid:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.FERAL));
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.HEAL));
+                    addAbility(character.id, AbilityType.FERAL);
+                    addAbility(character.id, AbilityType.HEAL);
 
                 case CharacterType.RuneMage:
 
-                    AbilityHandler.getInstance().addAbility(new Ability(character.id, AbilityType.STAFF));
+                    addAbility(character.id, AbilityType.STAFF);
             }
         }
 
         StateHandler.getInstance().setStatePlay();
     };
+
+    private function addAbility(aCharacterId : Int , aAbilityType : String , ?aRange : Null<Int> , ?aTargetType : AbilityTargetType):Void
+    {
+        var ability:Ability = new Ability(aCharacterId, aAbilityType, aRange, aTargetType);
+        AbilityHandler.getInstance().addAbility(ability);
+    }
 }

@@ -8,22 +8,24 @@ import haxe.ds.StringMap;
 
 enum EventTypes
 {
-    StartGame;
     MapsLoaded;
+    SetActiveCharacter;
+    CharacterInitialized;
     SelectCharacter;
     DeselectCharacter;
     SetCharacterEnabled;
+    ShowNextUser;
     TargetTileSelected;
     SelectAvatar;
-    RoundComplete;
-    NextRound;
-    UpdateAdjacentEnemies;
+    EndTurn;
+    NextTurn;
     UpdateAbilities;
-    UpdateAbilityIcon;
+    UpdateAbility;
     UpdateCharacterPosition;
     UpdateCharacterDirection;
-    CharacterDamaged;
-    CharacterKilled;
+    DealDamage;
+    TakeDamage;
+    Defeated;
     BackgroundClicked;
     UseAbility;
     UseAbilityGetCharacterPosition;
@@ -37,7 +39,6 @@ enum EventTypes
     MoveCharacterToPosition;
     HideTargetTiles;
     UpdateCharacterMoves;
-    EnemyKilled;
 }
 
 class EventBus

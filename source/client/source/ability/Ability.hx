@@ -2,12 +2,11 @@ package ability;
 
 import flash.geom.Point;
 import event.EventBus;
-import entity.EntityHandler;
-import entity.Entity;
 import entity.EntityType;
 import enemy.Enemy;
 import character.CharacterHandler;
 import character.CharacterModel;
+import ability.AbilityType;
 
 enum AbilityTargetType
 {
@@ -21,15 +20,15 @@ enum AbilityTargetType
 class Ability
 {
 	public var id:Int;
-    public var characterId:Int;
+    public var ownerId:Int;
     public var abilityType:String;
     public var range:Int;
     public var enabled:Bool;
     public var targetType:AbilityTargetType;
 
-	public function new(aCharacterId:Int, aAbilityType:String, ?aRange:Int, ?aTargetType:AbilityTargetType)
+	public function new(aOwnerId:Int, aAbilityType:String, ?aRange:Int, ?aTargetType:AbilityTargetType)
 	{
-        characterId = aCharacterId;
+        ownerId = aOwnerId;
         abilityType = aAbilityType;
         enabled = false;
 
@@ -61,7 +60,7 @@ class Ability
         {
             EventBus.subscribe(EventTypes.TargetTileSelected, targetTileSelected);
             EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
-            EventBus.dispatch(EventTypes.UseAbilityGetCharacterPosition, [characterId, range]);
+            EventBus.dispatch(EventTypes.UseAbilityGetCharacterPosition, [ownerId, range]);
         }
     }
 
@@ -81,32 +80,37 @@ class Ability
     {
         if(aData[0] == id)
         {
-            var character:CharacterModel = CharacterHandler.getInstance().getCharacter(characterId);
             var targetId:Int = aData[1];
 
             switch(targetType)
             {
                 case AbilityTargetType.Enemy:
 
-                    for (entity in EntityHandler.getInstance().getEntities())
+                    switch(abilityType)
                     {
-                        if(entity.type == EntityType.ENEMY)
-                        {
-                            var enemy:Enemy = cast(entity, Enemy);
+                        case AbilityType.SWORD:
 
-                            if(enemy.id == targetId)
-                            {
-                                enemy.takeDamage(character.getAtk(), characterId);
-                            }
-                        }
-                    }
+                            EventBus.dispatch(EventTypes.DealDamage, [ownerId, targetId]);
 
-                    for(character in CharacterHandler.getInstance().getAllCharacters())
-                    {
-                        if(character.id == targetId)
-                        {
-                            character.takeDamage(character.getAtk(), characterId);
-                        }
+                        case AbilityType.KNIFE:
+
+                            EventBus.dispatch(EventTypes.DealDamage, [ownerId, targetId]);
+
+                        case AbilityType.FIST:
+
+                            EventBus.dispatch(EventTypes.DealDamage, [ownerId, targetId]);
+
+                        case AbilityType.STAFF:
+
+                            EventBus.dispatch(EventTypes.DealDamage, [ownerId, targetId]);
+
+                        case AbilityType.BOW:
+
+                            EventBus.dispatch(EventTypes.DealDamage, [ownerId, targetId]);
+
+                        case AbilityType.TAUNT:
+
+                        default:
                     }
 
                 case AbilityTargetType.Self:

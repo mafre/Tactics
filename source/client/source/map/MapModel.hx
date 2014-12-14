@@ -204,6 +204,16 @@ class Map
         return characters.find(aValue);
     }
 
+    public function remove_character(aValue:Int):Void
+    {
+        characters.remove(aValue);
+    }
+
+    public function getAllCharacterPositions():Array<Point>
+    {
+        return characters.getAllOccupiedPositions();
+    }
+
     public function get_enemy(i : Int, j : Int) : Int
     {
         if (is_outside(i, j))
@@ -217,6 +227,11 @@ class Map
     public function find_enemy(aValue:Int):Point
     {
         return enemies.find(aValue);
+    }
+
+    public function remove_enemy(aValue:Int):Void
+    {
+        enemies.remove(aValue);
     }
 
     public function getAllEnemyPositions():Array<Point>
@@ -239,5 +254,12 @@ class Map
         }
 
         return value;
+    }
+
+    public function getAllUnitPositionsExcept(aValue:Int):Array<Point>
+    {
+        var a:Array<Point> = enemies.getAllOccupiedPositionsExcept(aValue);
+        a = a.concat(characters.getAllOccupiedPositionsExcept(aValue));
+        return a;
     }
 }

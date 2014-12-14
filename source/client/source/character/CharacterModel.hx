@@ -88,11 +88,15 @@ class CharacterModel
 
                 name = "Baldur";
                 path = "blacksmith";
+                str = 10;
+                vit = 20;
 
             case CharacterType.Berserk:
 
                 name = "Ljotur";
                 path = "berserk";
+                str = 15;
+                vit = 15;
 
             case CharacterType.Priest:
 
@@ -103,11 +107,16 @@ class CharacterModel
 
                 name = "Fantur";
                 path = "rogue";
+                agi = 20;
+                str = 10;
 
             case CharacterType.Knight:
 
                 name = "Trausti";
                 path = "knight";
+                str = 10;
+                vit = 15;
+                agi = 10;
 
             case CharacterType.Monk:
 
@@ -118,6 +127,9 @@ class CharacterModel
 
                 name = "Tjofur";
                 path = "thief";
+                agi = 30;
+                str = 10;
+                vit = 10;
 
             case CharacterType.Druid:
 
@@ -132,10 +144,13 @@ class CharacterModel
 
         setLevel(1);
 
-        EventBus.subscribe(EventTypes.SelectCharacter, selectCharacter);
+        EventBus.subscribe(EventTypes.SetActiveCharacter, setActiveCharacter);
+        EventBus.subscribe(EventTypes.CharacterInitialized, characterInitialized);
         EventBus.subscribe(EventTypes.DeselectCharacter, deselectCharacter);
         EventBus.subscribe(EventTypes.SetCharacterPosition, setPosition);
         EventBus.subscribe(EventTypes.UseAbility, useAbility);
+        EventBus.subscribe(EventTypes.DealDamage, dealDamage);
+        EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
         EventBus.subscribe(EventTypes.UseAbilityGetCharacterPosition, useAbilityGetCharacterPosition);
 	};
 
@@ -145,7 +160,7 @@ class CharacterModel
         EventBus.dispatch(EventTypes.SetCharacterEnabled, [id, enabled]);
     }
 
-    public function newRound():Void
+    public function reset():Void
     {
         abi = 1;
         resetMoveCount();
@@ -159,11 +174,19 @@ class CharacterModel
         }
     }
 
-    private function selectCharacter(aData:Array<Dynamic>):Void
+    private function setActiveCharacter(aData:Array<Dynamic>):Void
     {
         if(aData[0] == id)
         {
             EventBus.subscribe(EventTypes.TargetTileSelected, positionSelected);
+        }
+    }
+
+    private function characterInitialized(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            EventBus.dispatch(EventTypes.SelectCharacter, [id, pos, mov]);
         }
     }
 
@@ -189,11 +212,11 @@ class CharacterModel
         {
             var newPos:Point = aData[1];
             var distance:Int = TileHelper.getDistanceBetweenPoint(pos, newPos);
-            mov -= distance;
-            EventBus.dispatch(EventTypes.UpdateCharacterMoves, getMovesText());
 
+            mov -= distance;
             pos = newPos;
 
+            EventBus.dispatch(EventTypes.UpdateCharacterMoves, getMovesText());
             EventBus.dispatch(EventTypes.MoveCharacterToPosition, [id, pos]);
             EventBus.unsubscribe(EventTypes.TargetTileSelected, setPosition);
         }
@@ -235,8 +258,7 @@ class CharacterModel
 
 	public function getMaxHP():Int
 	{
-		//return Math.floor(10*lvl*Math.pow(1.01, vit));
-        return 1;
+		return Math.floor(10*lvl*Math.pow(1.01, vit));
 	}
 
 	public function getMaxSP():Int
@@ -244,17 +266,31 @@ class CharacterModel
 		return Math.floor(10+lvl*Math.pow(1.01, int));
 	}
 
-    public function takeDamage(aDamage:Int, aCharacterId:Int):Void
+    private function dealDamage(aData:Array<Dynamic>):Void
     {
-        hp -= aDamage;
+        var damageDealerId:Int = aData[0];
+        var targetId:Int = aData[1];
 
-        if(hp <= 0)
+        if(id == damageDealerId)
         {
-            EventBus.dispatch(EventTypes.CharacterKilled, [id, aCharacterId]);
+            EventBus.dispatch(EventTypes.TakeDamage, [id, targetId, getAtk()]);
         }
-        else
+    }
+
+    public function takeDamage(aData:Array<Dynamic>):Void
+    {
+        var damageDealerId:Int = aData[9];
+        var targetId:Int = aData[1];
+        var damage:Int = aData[2];
+
+        if(id == targetId)
         {
-            EventBus.dispatch(EventTypes.CharacterDamaged, [id, aCharacterId]);
+            hp -= damage;
+
+            if(hp <= 0)
+            {
+                EventBus.dispatch(EventTypes.Defeated, [id, damageDealerId]);
+            }
         }
     }
 
@@ -265,7 +301,7 @@ class CharacterModel
 
     public function getMaxMoves():Int
     {
-        return 10 + Math.floor(agi/15);
+        return 3 + Math.floor(agi/10);
     }
 
     public function getMoves():Int

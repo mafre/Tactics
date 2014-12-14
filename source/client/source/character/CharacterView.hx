@@ -22,6 +22,7 @@ class CharacterView extends TileBase
 {
     public var id:Int;
     private var asset:Animation;
+    private var enabled:Sprite;
 
 	public function new(aId:Int, aPath:String)
 	{
@@ -30,6 +31,10 @@ class CharacterView extends TileBase
         type = EntityType.CHARACTER;
         layer = 3;
         id = aId;
+
+        enabled = new Image("img/user/enabled.png");
+        addChild(enabled);
+        enabled.visible = false;
 
         asset = new Animation(true);
         asset.setFrames([1, 2]);
@@ -42,17 +47,19 @@ class CharacterView extends TileBase
 
         EventBus.subscribe(EventTypes.MoveCharacterToPosition, moveToPosition);
         EventBus.subscribe(EventTypes.SetCharacterEnabled, setEnabled);
-        EventBus.subscribe(EventTypes.CharacterDamaged, characterDamaged);
-        EventBus.subscribe(EventTypes.CharacterKilled, characterKilled);
+        EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
+        EventBus.subscribe(EventTypes.Defeated, defeated);
 	};
 
     private function setEnabled(aData:Array<Dynamic>):Void
     {
-        var enabled:Bool = aData[1];
-
         if(id == aData[0])
         {
-            if(enabled)
+            var isEnabled:Bool = aData[1];
+
+            enabled.visible = isEnabled;
+
+            if(isEnabled)
             {
                 addEventListener(MouseEvent.CLICK, characterClicked);
             }
@@ -63,39 +70,49 @@ class CharacterView extends TileBase
         }
     }
 
-    private function characterDamaged(aData:Array<Dynamic>):Void
+    private function takeDamage(aData:Array<Dynamic>):Void
     {
-        var characterId:Int = aData[0];
+        var targetId:Int = aData[0];
 
-        if(id == characterId)
+        if(id == targetId)
         {
 
         }
     }
 
-    private function characterKilled(aData:Array<Dynamic>):Void
+    private function defeated(aData:Array<Dynamic>):Void
     {
-        var characterId:Int = aData[0];
+        var targetId:Int = aData[0];
 
-        if(id == characterId)
+        if(id == targetId)
         {
             super.remove();
         }
     }
 
+
     private function characterClicked(e:MouseEvent):Void
     {
-        EventBus.dispatch(EventTypes.DeselectCharacter);
-        EventBus.dispatch(EventTypes.SelectCharacter, [id, super.getPosition()]);
-        EventBus.dispatch(EventTypes.UpdateAbilities, [id, super.getPosition()]);
+        selectCharacter(id);
+    }
+
+    private function selectCharacter(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            EventBus.dispatch(EventTypes.DeselectCharacter);
+            EventBus.dispatch(EventTypes.SetActiveCharacter, [id, super.getPosition()]);
+        }
     }
 
     private function moveToPosition(aData:Array<Dynamic>):Void
     {
-        if(id == aData[0])
+        var aId:Int = aData[0];
+        var aPos:Point = aData[1];
+
+        if(id == aId)
         {
-            super.setPosition(aData[1]);
-            EventBus.dispatch(EventTypes.UpdateAbilities, [id, super.getPosition()]);
+            super.setPosition(aPos);
         }
     }
 

@@ -8,17 +8,22 @@ import haxe.ds.StringMap;
 
 enum EventTypes
 {
+    StartGame;
     MapsLoaded;
     SelectCharacter;
     DeselectCharacter;
     SetCharacterEnabled;
     TargetTileSelected;
     SelectAvatar;
+    RoundComplete;
+    NextRound;
     UpdateAdjacentEnemies;
     UpdateAbilities;
     UpdateAbilityIcon;
     UpdateCharacterPosition;
     UpdateCharacterDirection;
+    CharacterDamaged;
+    CharacterKilled;
     BackgroundClicked;
     UseAbility;
     UseAbilityGetCharacterPosition;

@@ -18,11 +18,12 @@ class Test extends State
 
     public override function init(?vars:Dynamic):Void
     {
-        UserHandler.getInstance().setMyUser("1", "username");
+        UserHandler.getInstance().setMyUser("1", "username1", 0);
+        UserHandler.getInstance().addMatchedUser("2", "username2", 1);
 
         CharacterHandler.getInstance().addCharacter(new CharacterModel("1", CharacterType.Rogue));
         CharacterHandler.getInstance().addCharacter(new CharacterModel("1", CharacterType.Knight));
-        CharacterHandler.getInstance().addCharacter(new CharacterModel("1", CharacterType.Berserk));
+        CharacterHandler.getInstance().addCharacter(new CharacterModel("2", CharacterType.Berserk));
 
         var characters:Array<CharacterModel> = CharacterHandler.getInstance().getAllCharacters();
 

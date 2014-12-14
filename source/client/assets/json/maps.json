@@ -6,7 +6,7 @@
             "width":10,
             "height":10,
             "enemies":[{"id":1,"position":[2,5]}, {"id":1,"position":[2,8]}],
-            "startPosition":[8,1]
+            "startPositions":{"0":[8,1], "1":[8,8]}
         }
     }
 }

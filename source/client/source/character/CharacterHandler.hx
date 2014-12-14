@@ -18,6 +18,7 @@ class CharacterHandler
 	public function new()
 	{
         characters = [];
+        EventBus.subscribe(EventTypes.CharacterKilled, characterKilled);
 	};
 
     public function addCharacter(aCharacter:CharacterModel):Void
@@ -39,18 +40,55 @@ class CharacterHandler
         return null;
     }
 
-    public function nextRound(aUserId:String):Void
+    private function characterKilled(aData:Array<Dynamic>):Void
     {
-        getUsersCharacters(aUserId);
+        var characterId:Int = aData[0];
+        var character:CharacterModel = getCharacter(characterId);
+        characters.remove(character);
+    }
+
+    public function roundComplete(aUserId:String):Void
+    {
+        var a:Array<CharacterModel> = getUsersCharacters(aUserId);
+
+        for(character in a)
+        {
+            character.setEnabled(false);
+        }
+    }
+
+    public function startRound(aUserId:String):Void
+    {
+        var a:Array<CharacterModel> = getUsersCharacters(aUserId);
+
+        for(character in a)
+        {
+            character.setEnabled(true);
+        }
     }
 
     public function getUsersCharacters(aUserId:String):Array<CharacterModel>
     {
-        var a:Array<Character> = [];
+        var a:Array<CharacterModel> = [];
 
         for(character in characters)
         {
             if(character.userId == aUserId)
+            {
+                a.push(character);
+            }
+        }
+
+        return a;
+    }
+
+    public function getOpponentCharacters(aUserId:String):Array<CharacterModel>
+    {
+        var a:Array<CharacterModel> = [];
+
+        for(character in characters)
+        {
+            if(character.userId != aUserId)
             {
                 a.push(character);
             }

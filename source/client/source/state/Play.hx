@@ -10,6 +10,7 @@ import entity.EntityHandler;
 import map.MapView;
 import map.MapModel;
 import ui.UI;
+import event.EventBus;
 
 class Play extends State
 {

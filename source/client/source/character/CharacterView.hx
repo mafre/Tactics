@@ -40,9 +40,48 @@ class CharacterView extends TileBase
         asset.x = TileHelper.tileWidth - asset.width/2;
         asset.y = TileHelper.tileHeight - asset.height;
 
-        addEventListener(MouseEvent.CLICK, characterClicked);
         EventBus.subscribe(EventTypes.MoveCharacterToPosition, moveToPosition);
+        EventBus.subscribe(EventTypes.SetCharacterEnabled, setEnabled);
+        EventBus.subscribe(EventTypes.CharacterDamaged, characterDamaged);
+        EventBus.subscribe(EventTypes.CharacterKilled, characterKilled);
 	};
+
+    private function setEnabled(aData:Array<Dynamic>):Void
+    {
+        var enabled:Bool = aData[1];
+
+        if(id == aData[0])
+        {
+            if(enabled)
+            {
+                addEventListener(MouseEvent.CLICK, characterClicked);
+            }
+            else
+            {
+                removeEventListener(MouseEvent.CLICK, characterClicked);
+            }
+        }
+    }
+
+    private function characterDamaged(aData:Array<Dynamic>):Void
+    {
+        var characterId:Int = aData[0];
+
+        if(id == characterId)
+        {
+
+        }
+    }
+
+    private function characterKilled(aData:Array<Dynamic>):Void
+    {
+        var characterId:Int = aData[0];
+
+        if(id == characterId)
+        {
+            super.remove();
+        }
+    }
 
     private function characterClicked(e:MouseEvent):Void
     {

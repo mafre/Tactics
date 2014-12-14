@@ -6,6 +6,7 @@ import flash.geom.Point;
 import haxe.ds.Vector;
 import openfl.Assets;
 import haxe.Json;
+import haxe.ds.IntMap;
 
 import common.Array2D;
 import common.StageInfo;
@@ -42,8 +43,17 @@ class MapModel
             var mapName:String = Std.string(n);
             var width:Int = level.width;
             var height:Int = level.height;
-            var startPosition:Point = new Point(level.startPosition[0], level.startPosition[1]);
-            var map:Map = new Map(mapName, width, height, startPosition);
+            var startPositions:IntMap<Point> = new IntMap<Point>();
+
+            for(m in Reflect.fields(level.startPositions))
+            {
+                var id:Int = Std.parseInt(m);
+                var pos:Array<Int> = Reflect.field(level.startPositions, m);
+                var p:Point = new Point(pos[0], pos[1]);
+                startPositions.set(id, p);
+            }
+
+            var map:Map = new Map(mapName, width, height, startPositions);
 
             var enemies:Array<Dynamic> = level.enemies;
             if(enemies != null)
@@ -72,7 +82,7 @@ class Map
     private var height : Int;
     private var width : Int;
     private var mapName : String;
-    private var startPosition:Point;
+    private var startPositions:IntMap<Point>;
 
     private var ground_height : Array2D;
     private var ground_type : Array2D;
@@ -80,12 +90,12 @@ class Map
     private var enemies : Array2D;
     private var target : Array2D;
 
-    public function new(aMapName:String, aWidth:Int, aHeight:Int, aStartPosition:Point)
+    public function new(aMapName:String, aWidth:Int, aHeight:Int, aStartPositions:IntMap<Point>)
     {
         mapName = aMapName;
         height = aHeight;
         width = aWidth;
-        startPosition = aStartPosition;
+        startPositions = aStartPositions;
 
         ground_height = new Array2D(width, height);
         ground_type = new Array2D(width, height);
@@ -109,14 +119,14 @@ class Map
         return height;
     }
 
-    public function get_start_x_position():Float
+    public function get_start_x_position(aPlayOrder:Int):Int
     {
-        return startPosition.x;
+        return cast(startPositions.get(aPlayOrder).x, Int);
     }
 
-    public function get_start_y_position():Float
+    public function get_start_y_position(aPlayOrder:Int):Int
     {
-        return startPosition.y;
+        return cast(startPositions.get(aPlayOrder).y, Int);
     }
 
     public function is_occupied(i : Int, j : Int) : Bool

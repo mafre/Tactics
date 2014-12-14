@@ -142,6 +142,7 @@ class CharacterModel
     public function setEnabled(aEnabled:Bool):Void
     {
         enabled = aEnabled;
+        EventBus.dispatch(EventTypes.SetCharacterEnabled, [id, enabled]);
     }
 
     public function newRound():Void
@@ -154,7 +155,7 @@ class CharacterModel
     {
         if(id == aData[0])
         {
-            EventBus.dispatch(EventTypes.UseAbilityGetTargetTiles, [pos, aData[1]]);
+            EventBus.dispatch(EventTypes.UseAbilityGetTargetTiles, [pos, userId, aData[1]]);
         }
     }
 
@@ -198,6 +199,11 @@ class CharacterModel
         }
     }
 
+    public function getPosition():Point
+    {
+        return pos;
+    }
+
     private function useAbility(aId:Int):Void
     {
         EventBus.unsubscribe(EventTypes.TargetTileSelected, positionSelected);
@@ -229,13 +235,28 @@ class CharacterModel
 
 	public function getMaxHP():Int
 	{
-		return Math.floor(10*lvl*Math.pow(1.01, vit));
+		//return Math.floor(10*lvl*Math.pow(1.01, vit));
+        return 1;
 	}
 
 	public function getMaxSP():Int
 	{
 		return Math.floor(10+lvl*Math.pow(1.01, int));
 	}
+
+    public function takeDamage(aDamage:Int, aCharacterId:Int):Void
+    {
+        hp -= aDamage;
+
+        if(hp <= 0)
+        {
+            EventBus.dispatch(EventTypes.CharacterKilled, [id, aCharacterId]);
+        }
+        else
+        {
+            EventBus.dispatch(EventTypes.CharacterDamaged, [id, aCharacterId]);
+        }
+    }
 
     public function resetMoveCount():Void
     {

@@ -52,14 +52,16 @@ class MessageHandler
 
                 var id:String = cast(aMessage.data.id, String);
                 var userName:String = cast(aMessage.data.userName, String);
-                UserHandler.getInstance().setMyUser(id, userName);
+                var playOrder:Int = cast(aMessage.data.playOrder, Int);
+                UserHandler.getInstance().setMyUser(id, userName, playOrder);
 
 				StateHandler.getInstance().setStateLobby();
 
 			case MessageType.LOGGED_IN:
                 var id:String = cast(aMessage.data.id, String);
                 var userName:String = cast(aMessage.data.userName, String);
-                UserHandler.getInstance().setMyUser(id, userName);
+                var playOrder:Int = cast(aMessage.data.playOrder, Int);
+                UserHandler.getInstance().setMyUser(id, userName, playOrder);
                 dispatcher.dispatchEvent(new Event(MessageType.LOGGED_IN));
 				StateHandler.getInstance().setStateLobby();
 
@@ -70,7 +72,8 @@ class MessageHandler
 			case MessageType.ADD_MATCHED_USER:
 				var id:String = cast(aMessage.data.id, String);
                 var userName:String = cast(aMessage.data.userName, String);
-				UserHandler.getInstance().addMatchedUser(id, userName);
+                var playOrder:Int = cast(aMessage.data.playOrder, Int);
+				UserHandler.getInstance().addMatchedUser(id, userName, playOrder);
 
 			case MessageType.REMOVE_USER:
 				var id = cast(aMessage.data.id, String);

@@ -82,6 +82,7 @@ class Ability
         if(aData[0] == id)
         {
             var character:CharacterModel = CharacterHandler.getInstance().getCharacter(characterId);
+            var targetId:Int = aData[1];
 
             switch(targetType)
             {
@@ -93,10 +94,18 @@ class Ability
                         {
                             var enemy:Enemy = cast(entity, Enemy);
 
-                            if(enemy.id == aData[1])
+                            if(enemy.id == targetId)
                             {
-                                enemy.damage(character.getAtk(), characterId);
+                                enemy.takeDamage(character.getAtk(), characterId);
                             }
+                        }
+                    }
+
+                    for(character in CharacterHandler.getInstance().getAllCharacters())
+                    {
+                        if(character.id == targetId)
+                        {
+                            character.takeDamage(character.getAtk(), characterId);
                         }
                     }
 

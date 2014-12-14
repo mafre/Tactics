@@ -57,7 +57,7 @@ class Enemy extends TileBase
 		dispatchEvent(new Event(EventType.ENEMY_CLICKED));
 	}
 
-    public function damage(aDamage:Int, aCharacterId:Int):Void
+    public function takeDamage(aDamage:Int, aCharacterId:Int):Void
     {
         hp -= aDamage;
 

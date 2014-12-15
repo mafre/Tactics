@@ -55,6 +55,7 @@ class Ability extends Sprite
         EventBus.subscribe(EventTypes.UseAbilityApply, abilityApply);
         EventBus.subscribe(EventTypes.UpdateAbility, updateAbility);
         EventBus.subscribe(EventTypes.UseAbility, useAbility);
+        EventBus.subscribe(EventTypes.DisableAbilities, disable);
 
         setEnabled(false);
 	}
@@ -72,7 +73,9 @@ class Ability extends Sprite
 
     private function abilityApply(aData:Array<Dynamic>):Void
     {
-        setSelected(false);
+        selected = false;
+        close.visible = false;
+        ok.visible = false;
     }
 
 	public function mouseDown(e:MouseEvent):Void
@@ -129,10 +132,38 @@ class Ability extends Sprite
         }
         else
         {
-            EventBus.dispatch(EventTypes.CancelAbility);
-            close.visible = false;
-            ok.visible = false;
+            switch(targetType)
+            {
+                case AbilityTargetType.Self:
+
+                    EventBus.dispatch(EventTypes.UseAbilityApply, [id, 0]);
+                    close.visible = false;
+                    ok.visible = false;
+
+                case AbilityTargetType.AllEnemies:
+
+                    EventBus.dispatch(EventTypes.UseAbilityApply, [id, 0]);
+                    close.visible = false;
+                    ok.visible = false;
+
+                case AbilityTargetType.AllAllies:
+
+                    EventBus.dispatch(EventTypes.UseAbilityApply, [id, 0]);
+                    close.visible = false;
+                    ok.visible = false;
+
+                default:
+
+                    EventBus.dispatch(EventTypes.CancelAbility);
+                    close.visible = false;
+                    ok.visible = false;
+            }
         }
+    }
+
+    private function disable():Void
+    {
+        setEnabled(false);
     }
 
     public function setEnabled(aEnabled:Bool):Void

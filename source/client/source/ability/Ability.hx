@@ -51,6 +51,8 @@ class Ability
         }
 
         EventBus.subscribe(EventTypes.UseAbility, useAbility);
+        EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
+        EventBus.subscribe(EventTypes.DeselectCharacter, cancelAbility);
         EventBus.subscribe(EventTypes.UseAbilityApply, apply);
 	};
 
@@ -60,7 +62,7 @@ class Ability
         {
             EventBus.subscribe(EventTypes.TargetTileSelected, targetTileSelected);
             EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
-            EventBus.dispatch(EventTypes.UseAbilityGetCharacterPosition, [ownerId, range]);
+            EventBus.dispatch(EventTypes.UseAbilityGetCharacterPosition, [ownerId, range, targetType]);
         }
     }
 
@@ -80,6 +82,8 @@ class Ability
     {
         if(aData[0] == id)
         {
+            EventBus.dispatch(EventTypes.AbilityUsed, ownerId);
+
             var targetId:Int = aData[1];
 
             switch(targetType)
@@ -108,12 +112,25 @@ class Ability
 
                             EventBus.dispatch(EventTypes.DealDamage, [ownerId, targetId]);
 
+                        case AbilityType.HAMMER:
+
+                            EventBus.dispatch(EventTypes.DealDamage, [ownerId, targetId]);
+
                         case AbilityType.TAUNT:
 
                         default:
                     }
 
                 case AbilityTargetType.Self:
+
+                    switch(abilityType)
+                    {
+                        case AbilityType.SHIELD:
+
+                            EventBus.dispatch(EventTypes.Guard, ownerId);
+
+                        default:
+                    }
 
                 case AbilityTargetType.Ally:
 

@@ -1,6 +1,5 @@
 package map;
 
-import flash.utils.Function;
 import flash.display.Sprite;
 import flash.geom.Point;
 import haxe.ds.Vector;

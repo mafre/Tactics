@@ -10,9 +10,11 @@ import event.EventType;
 import event.EventBus;
 import utils.SoundHandler;
 import enemy.EnemyType;
+import entity.EntityHandler;
 import entity.EntityType;
 import entity.Entity;
 import tile.TileBase;
+import ui.AttackResultInfo;
 
 class Enemy extends TileBase
 {
@@ -31,6 +33,7 @@ class Enemy extends TileBase
 
         EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
         EventBus.subscribe(EventTypes.DealDamage, dealDamage);
+        EventBus.subscribe(EventTypes.ShowBlocked, showBlocked);
         EventBus.subscribe(EventTypes.Defeated, defeated);
 	}
 
@@ -47,7 +50,7 @@ class Enemy extends TileBase
             case 1:
 
                 typeName = EnemyType.TROLL;
-                hp = 1;
+                hp = 100;
                 str = 20;
         };
 
@@ -76,17 +79,39 @@ class Enemy extends TileBase
     {
         var damageDealerId:Int = aData[9];
         var targetId:Int = aData[1];
-        var damage:Int = aData[2];
+        var value:Int = aData[2];
 
         if(id == targetId)
         {
-            hp -= damage;
+            hp -= value;
 
             if(hp <= 0)
             {
                 EventBus.dispatch(EventTypes.Defeated, [id, damageDealerId]);
                 super.remove();
             }
+            else
+            {
+                var info:AttackResultInfo = new AttackResultInfo(Std.string(value));
+
+                info.x = x + asset.width/2 - info.width/2;
+                info.y = y - asset.height - 3;
+
+                EntityHandler.getInstance().addEntity(info);
+            }
+        }
+    }
+
+    private function showBlocked(targetId:Int):Void
+    {
+        if(id == targetId)
+        {
+            var info:AttackResultInfo = new AttackResultInfo("Blocked");
+
+            info.x = x + asset.width/2 - info.width/2;
+            info.y = y - asset.height - 3;
+
+            EntityHandler.getInstance().addEntity(info);
         }
     }
 

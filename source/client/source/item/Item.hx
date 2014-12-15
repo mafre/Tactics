@@ -2,7 +2,6 @@ package item;
 
 import flash.events.EventDispatcher;
 import flash.events.Event;
-import flash.utils.Function;
 import flash.display.Sprite;
 import flash.geom.Point;
 

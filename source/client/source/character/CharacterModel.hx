@@ -1,6 +1,5 @@
 package character;
 
-import flash.utils.Function;
 import flash.geom.Point;
 import event.EventBus;
 import tile.TileHelper;
@@ -61,6 +60,7 @@ class CharacterModel
     public var direction:Direction;
     public var state:CharacterState;
     public var enabled:Bool;
+    private var guard:Bool;
 
 	public function new(aUserId:String, aType:CharacterType)
 	{
@@ -151,6 +151,9 @@ class CharacterModel
         EventBus.subscribe(EventTypes.UseAbility, useAbility);
         EventBus.subscribe(EventTypes.DealDamage, dealDamage);
         EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
+        EventBus.subscribe(EventTypes.AbilityUsed, abilityUsed);
+        EventBus.subscribe(EventTypes.UpdateAbilities, updateAbilities);
+        EventBus.subscribe(EventTypes.Guard, guarding);
         EventBus.subscribe(EventTypes.UseAbilityGetCharacterPosition, useAbilityGetCharacterPosition);
 	};
 
@@ -164,13 +167,42 @@ class CharacterModel
     {
         abi = 1;
         resetMoveCount();
+        guard = false;
+    }
+
+    private function abilityUsed(aCharacterId:Int):Void
+    {
+        if(id == aCharacterId)
+        {
+            abi--;
+
+            if(abi == 0)
+            {
+                EventBus.dispatch(EventTypes.DisableAbilities);
+            }
+        }
+    }
+
+    private function guarding(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            guard = true;
+            mov = 0;
+            abi = 0;
+            EventBus.dispatch(EventTypes.UpdateCharacterMoves, getMovesText());
+        }
     }
 
     private function useAbilityGetCharacterPosition(aData:Array<Dynamic>):Void
     {
-        if(id == aData[0])
+        var characterId:Int = aData[0];
+        var range:Int = aData[1];
+        var abilityType:AbilityTargetType = aData[2];
+
+        if(id == characterId)
         {
-            EventBus.dispatch(EventTypes.UseAbilityGetTargetTiles, [pos, userId, aData[1]]);
+            EventBus.dispatch(EventTypes.UseAbilityGetTargetTiles, [pos, userId, range, abilityType]);
         }
     }
 
@@ -186,7 +218,16 @@ class CharacterModel
     {
         if(id == aId)
         {
-            EventBus.dispatch(EventTypes.SelectCharacter, [id, pos, mov]);
+            EventBus.dispatch(EventTypes.SelectCharacter, [id, pos, mov, abi]);
+            EventBus.dispatch(EventTypes.GetValidAbilities, [userId, id, pos]);
+        }
+    }
+
+    private function updateAbilities(aId):Void
+    {
+        if(id == aId)
+        {
+            EventBus.dispatch(EventTypes.GetValidAbilities, [userId, id, pos]);
         }
     }
 
@@ -203,7 +244,7 @@ class CharacterModel
     private function positionSelected(aPosition:Point):Void
     {
         EventBus.unsubscribe(EventTypes.TargetTileSelected, positionSelected);
-        EventBus.dispatch(EventTypes.SetCharacterPosition, [id, aPosition]);
+        EventBus.dispatch(EventTypes.SetCharacterPosition, [id, aPosition, abi]);
     }
 
     private function setPosition(aData:Array<Dynamic>):Void
@@ -219,6 +260,7 @@ class CharacterModel
             EventBus.dispatch(EventTypes.UpdateCharacterMoves, getMovesText());
             EventBus.dispatch(EventTypes.MoveCharacterToPosition, [id, pos]);
             EventBus.unsubscribe(EventTypes.TargetTileSelected, setPosition);
+            EventBus.dispatch(EventTypes.GetValidAbilities, [userId, id, pos]);
         }
     }
 
@@ -285,11 +327,21 @@ class CharacterModel
 
         if(id == targetId)
         {
+            if(guard)
+            {
+                EventBus.dispatch(EventTypes.ShowBlocked, id);
+                return;
+            }
+
             hp -= damage;
 
             if(hp <= 0)
             {
                 EventBus.dispatch(EventTypes.Defeated, [id, damageDealerId]);
+            }
+            else
+            {
+                EventBus.dispatch(EventTypes.ShowDamage, [id, damage]);
             }
         }
     }

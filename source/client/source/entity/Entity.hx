@@ -23,6 +23,11 @@ class Entity extends Sprite
 		mouseChildren = false;
 	};
 
+    public function init():Void
+    {
+
+    }
+
     public function show():Void
     {
         visible = true;

@@ -3,7 +3,6 @@ package map;
 import flash.events.EventDispatcher;
 import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.utils.Function;
 import flash.display.Sprite;
 import flash.geom.Point;
 
@@ -22,6 +21,7 @@ import tile.TileHelper;
 import tile.SelectionTile;
 import tile.TargetTile;
 import ability.AbilityHandler;
+import ability.Ability;
 import user.UserHandler;
 
 class MapView extends Sprite
@@ -78,8 +78,6 @@ class MapView extends Sprite
             }
         }
 
-        var enemyCount:Int = 0;
-
         for (x in 0...map.get_width())
         {
             for (y in 0...map.get_height())
@@ -89,12 +87,11 @@ class MapView extends Sprite
                 if(aType > 0)
                 {
                     var enemy:Enemy = new Enemy();
-                    enemy.id = enemyCount+1000;
                     enemy.setType(aType);
                     enemy.setPosition(new Point(x, y));
+                    CharacterHandler.getInstance().addEnemy(enemy);
                     EntityHandler.getInstance().addEntity(enemy);
                     map.set_enemy(cast(enemy.getPosition().x, Int), cast(enemy.getPosition().y, Int), enemy.id);
-                    enemyCount++;
                 }
             };
         };
@@ -128,6 +125,7 @@ class MapView extends Sprite
         var characterId:Int = aData[0];
         var characterPos:Point = aData[1];
         var moves:Int = aData[2];
+        var abilityUsesRemaining:Int = aData[3];
         var distance:Int = 0;
         var tileCount:Int = 0;
 
@@ -145,9 +143,6 @@ class MapView extends Sprite
                 tileCount++;
             };
         };
-
-        trace("select");
-        EventBus.dispatch(EventTypes.UpdateAbilities, [characterId, characterPos, getValidTargets(characterId)]);
     }
 
     private function useAbilityGetTargetTiles(aData:Array<Dynamic>):Void
@@ -157,6 +152,7 @@ class MapView extends Sprite
         var ownerPosition:Point = aData[0];
         var userId:String = aData[1];
         var range:Int = aData[2];
+        var type:AbilityTargetType = aData[3];
 
         var validTargets:Array<Int> = [];
 
@@ -188,9 +184,34 @@ class MapView extends Sprite
             {
                 for (validTarget in validTargets)
                 {
-                    if(currentMap.get_enemy(x, y) == validTarget || currentMap.get_character(x, y) == validTarget)
+                    if(currentMap.get_enemy(x, y) == validTarget)
                     {
                         EventBus.dispatch(EventTypes.UseAbilityShowTargetTile, tileCount);
+                    }
+
+                    if(currentMap.get_character(x, y) == validTarget)
+                    {
+                        var id:Int = currentMap.get_character(x, y);
+                        var ownerId:String = CharacterHandler.getInstance().getCharacter(id).userId;
+
+                        switch(type)
+                        {
+                            case AbilityTargetType.Enemy:
+
+                                if(ownerId != userId)
+                                {
+                                    EventBus.dispatch(EventTypes.UseAbilityShowTargetTile, tileCount);
+                                }
+
+                            case AbilityTargetType.Ally:
+
+                                if(ownerId == userId)
+                                {
+                                    EventBus.dispatch(EventTypes.UseAbilityShowTargetTile, tileCount);
+                                }
+
+                            default:
+                        }
                     }
                 }
 
@@ -221,8 +242,8 @@ class MapView extends Sprite
     {
         var characterId:Int = aData[0];
         var newPos:Point = aData[1];
+        var abilityUsesRemaining:Int = aData[2];
         currentMap.move_character(characterId, cast(newPos.x, Int), cast(newPos.y, Int));
-        EventBus.dispatch(EventTypes.UpdateAbilities, [characterId, newPos, getValidTargets(characterId)]);
     }
 
     private function getValidTargets(aUnitId:Int):Array<Point>
@@ -237,12 +258,6 @@ class MapView extends Sprite
         var defeaterId:Int = aData[1];
         var characterPos:Point = currentMap.find_character(defeatedId);
         var enemyPos:Point = currentMap.find_enemy(defeatedId);
-        var defeaterPos:Point = currentMap.find_character(defeaterId);
-
-        if(defeaterPos == null)
-        {
-            defeaterPos = currentMap.find_enemy(defeaterId);
-        }
 
         if(characterPos != null)
         {
@@ -254,6 +269,6 @@ class MapView extends Sprite
             currentMap.remove_enemy(defeatedId);
         }
 
-        EventBus.dispatch(EventTypes.UpdateAbilities, [defeaterId, defeaterPos, getValidTargets(defeaterId)]);
+        EventBus.dispatch(EventTypes.UpdateAbilities, defeaterId);
     }
 }

@@ -39,6 +39,7 @@ class TargetTile extends TileBase
         EventBus.subscribe(EventTypes.DeselectCharacter, hide);
         EventBus.subscribe(EventTypes.UseAbilityShowTargetTile, showAbilityTargetTile);
         EventBus.subscribe(EventTypes.CancelAbility, hide);
+        EventBus.subscribe(EventTypes.EndTurn, hide);
     };
 
     private function showMoveTile(aId:Int):Void

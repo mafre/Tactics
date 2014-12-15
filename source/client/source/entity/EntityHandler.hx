@@ -2,7 +2,6 @@ package entity;
 
 import flash.events.EventDispatcher;
 import flash.events.Event;
-import flash.utils.Function;
 import flash.display.Sprite;
 
 import event.EventType;
@@ -43,6 +42,7 @@ class EntityHandler
     {
         items.push(entity);
         layers[entity.layer].addChild(entity);
+        entity.init();
     };
 
     public function getEntities():Array<Entity>
@@ -88,12 +88,12 @@ class EntityHandler
         };
     };
 
-    public function addEventListener(type:String, listener:Function):Void
+    public function addEventListener(type:String, listener:Dynamic):Void
     {
         dispatcher.addEventListener(type, listener);
     };
 
-    public function removeEventListener(type:String, listener:Function):Void
+    public function removeEventListener(type:String, listener:Dynamic):Void
     {
         dispatcher.removeEventListener(type, listener);
     };

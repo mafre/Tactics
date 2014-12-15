@@ -110,4 +110,20 @@ class TextfieldFactory
 
 		return field;
 	}
+
+    public static inline function getAttackResultInfo():Dynamic
+    {
+        var format = new TextFormat("assets/fonts/F", 30, 0x000000);
+
+        var field = new TextField();
+        field.defaultTextFormat = format;
+        field.autoSize = TextFieldAutoSize.CENTER;
+        field.mouseEnabled = false;
+        field.embedFonts = true;
+
+        //var outline:GlowFilter=new GlowFilter(0x000000,1,3,3,300);
+        //field.filters=[outline];
+
+        return field;
+    }
 }

@@ -10,6 +10,7 @@ import common.Button;
 import ui.CharacterMenu;
 import ui.Profile;
 import ui.NextTurn;
+import ui.UserWon;
 import event.EventType;
 import event.EventBus;
 
@@ -19,6 +20,7 @@ class UI extends Sprite
     private var profile:Profile;
     private var endTurn:Button;
     private var nextTurn:NextTurn;
+    private var userWon:UserWon;
 
 	public function new()
 	{
@@ -37,6 +39,9 @@ class UI extends Sprite
 
         nextTurn = new NextTurn();
         addChild(nextTurn);
+
+        userWon = new UserWon();
+        addChild(userWon);
 	};
 
     private function endTurnPressed(e:Event):Void

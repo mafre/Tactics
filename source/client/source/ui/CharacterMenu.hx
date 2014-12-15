@@ -44,6 +44,7 @@ class CharacterMenu extends Sprite
 
         EventBus.subscribe(EventTypes.SetActiveCharacter, show);
         EventBus.subscribe(EventTypes.DeselectCharacter, hide);
+        EventBus.subscribe(EventTypes.EndTurn, hide);
         EventBus.subscribe(EventTypes.UpdateCharacterMoves, updateCharacterMoves);
 
         moves = new LabelButton("button1", "moves");

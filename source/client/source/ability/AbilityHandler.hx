@@ -5,7 +5,6 @@ import flash.display.Sprite;
 import flash.geom.Point;
 import flash.display.MovieClip;
 import flash.utils.Object;
-import flash.utils.Function;
 
 import event.DataEvent;
 import common.StageInfo;
@@ -30,7 +29,8 @@ class AbilityHandler
     {
         dispatcher = new EventDispatcher();
         abilities = [];
-        EventBus.subscribe(EventTypes.UpdateAbilities, updateAbilities);
+        EventBus.subscribe(EventTypes.GetValidAbilities, getValidAbilities);
+        EventBus.subscribe(EventTypes.GetPositionsResult, getPositionsResult);
     }
 
     public function addAbility(aAbility:Ability):Void
@@ -50,6 +50,56 @@ class AbilityHandler
         }
 
         return null;
+    }
+
+    private function getValidAbilities(aData:Array<Dynamic>):Void
+    {
+        var userId:Int = aData[0];
+        var characterId:Int = aData[1];
+        var characterPos:Point = aData[2];
+
+        var a:Array<Ability> = getCharactersAbilities(characterId);
+
+        for(ability in a)
+        {
+            switch(ability.targetType)
+            {
+                case AbilityTargetType.Enemy:
+
+                    var data:Array<Dynamic> = [ability.id, characterPos];
+                    EventBus.dispatch(EventTypes.GetOpponentPositionsQuery, [userId, data]);
+
+                case AbilityTargetType.Self:
+
+                    EventBus.dispatch(EventTypes.UpdateAbility, [ability.id, true]);
+
+                default:
+
+            }
+        }
+    }
+
+    private function getPositionsResult(aData:Array<Dynamic>):Void
+    {
+        var positions:Array<Point> = aData[0];
+        var data:Array<Dynamic> = aData[1];
+        var abilityId:Int = data[0];
+        var characterPos:Point = data[1];
+        var ability:Ability = getAbility(abilityId);
+        var withinRange:Bool = false;
+
+        for (position in positions)
+        {
+            var distance:Int = TileHelper.getDistanceBetweenPoint(characterPos, position);
+
+            if(ability.range >= distance)
+            {
+                withinRange = true;
+                break;
+            }
+        }
+
+        EventBus.dispatch(EventTypes.UpdateAbility, [ability.id, withinRange]);
     }
 
     public function getCharactersAbilities(aCharacterId:Int):Array<Ability>
@@ -78,53 +128,12 @@ class AbilityHandler
         }
     }
 
-    public function updateAbilities(aData:Array<Dynamic>):Void
-    {
-        var ownerId:Int = aData[0];
-        var ownerPosition:Point = aData[1];
-        var positions:Array<Point> = aData[2];
-
-        for (ability in abilities)
-        {
-            ability.enabled = false;
-        }
-
-        for (ability in abilities)
-        {
-            if(ability.ownerId == ownerId)
-            {
-                if(ability.targetType == AbilityTargetType.Self)
-                {
-                    ability.enabled = true;
-                }
-
-                if(ability.targetType == AbilityTargetType.Enemy)
-                {
-                    for (position in positions)
-                    {
-                        var distance:Int = TileHelper.getDistanceBetweenPoint(ownerPosition, position);
-
-                        if(ability.range >= distance)
-                        {
-                            ability.enabled = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        for (ability in abilities)
-        {
-            EventBus.dispatch(EventTypes.UpdateAbility, [ability.id, ability.enabled]);
-        }
-    }
-
-    public function addEventListener(type:String, listener:Function):Void
+    public function addEventListener(type:String, listener:Dynamic):Void
     {
         dispatcher.addEventListener(type, listener);
     };
 
-    public function removeEventListener(type:String, listener:Function):Void
+    public function removeEventListener(type:String, listener:Dynamic):Void
     {
         dispatcher.removeEventListener(type, listener);
     };

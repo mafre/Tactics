@@ -9,6 +9,7 @@ import ability.Ability;
 import ability.AbilityType;
 import entity.Entity;
 import entity.EntityType;
+import entity.EntityHandler;
 import common.Animation;
 import common.GridSprite;
 import common.Image;
@@ -17,6 +18,7 @@ import event.EventBus;
 import utils.SoundHandler;
 import tile.TileBase;
 import tile.TileHelper;
+import ui.AttackResultInfo;
 
 class CharacterView extends TileBase
 {
@@ -47,7 +49,8 @@ class CharacterView extends TileBase
 
         EventBus.subscribe(EventTypes.MoveCharacterToPosition, moveToPosition);
         EventBus.subscribe(EventTypes.SetCharacterEnabled, setEnabled);
-        EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
+        EventBus.subscribe(EventTypes.ShowDamage, showDamage);
+        EventBus.subscribe(EventTypes.ShowBlocked, showBlocked);
         EventBus.subscribe(EventTypes.Defeated, defeated);
 	};
 
@@ -70,13 +73,32 @@ class CharacterView extends TileBase
         }
     }
 
-    private function takeDamage(aData:Array<Dynamic>):Void
+    private function showDamage(aData:Array<Dynamic>):Void
     {
         var targetId:Int = aData[0];
+        var value:Int = aData[1];
 
         if(id == targetId)
         {
+            var info:AttackResultInfo = new AttackResultInfo(Std.string(value));
 
+            info.x = x + asset.width/2 - info.width/2;
+            info.y = y - asset.height - 3;
+
+            EntityHandler.getInstance().addEntity(info);
+        }
+    }
+
+    private function showBlocked(targetId:Int):Void
+    {
+        if(id == targetId)
+        {
+            var info:AttackResultInfo = new AttackResultInfo("Blocked");
+
+            info.x = x + asset.width/2 - info.width/2;
+            info.y = y - asset.height - 3;
+
+            EntityHandler.getInstance().addEntity(info);
         }
     }
 

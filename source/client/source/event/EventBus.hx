@@ -2,7 +2,6 @@
 package event;
 
 import flash.utils.Object;
-import flash.utils.Function;
 
 import haxe.ds.StringMap;
 
@@ -34,11 +33,22 @@ enum EventTypes
     UseAbilityTargetTileSelected;
     UseAbilityApply;
     CancelAbility;
+    DisableAbilities;
+    GetValidAbilities;
+    GetOpponentPositionsQuery;
+    GetAllyPositionsQuery;
+    GetPositionsResult;
     ShowMoveTile;
     SetCharacterPosition;
     MoveCharacterToPosition;
     HideTargetTiles;
     UpdateCharacterMoves;
+    Guard;
+    AbilityUsed;
+    ShowDamage;
+    ShowBlocked;
+    UserWon;
+    ResetGame;
 }
 
 class EventBus
@@ -50,13 +60,13 @@ class EventBus
         subscriptions = [];
 	}
 
-	public static function subscribe(aType:EventTypes, aSubscribedFunction:Function):Void
+	public static function subscribe(aType:EventTypes, aSubscribedFunction:Dynamic):Void
     {
         var subscription:Subscription = new Subscription(aType, aSubscribedFunction);
         subscriptions.push(subscription);
     }
 
-    public static function unsubscribe(aType:EventTypes, aSubscribedFunction:Function):Void
+    public static function unsubscribe(aType:EventTypes, aSubscribedFunction:Dynamic):Void
     {
         for(subscription in subscriptions)
         {
@@ -90,9 +100,9 @@ class EventBus
 class Subscription
 {
     public var type:EventTypes;
-    public var subscribedFunction:Function;
+    public var subscribedFunction:Dynamic;
 
-    public function new(aType:EventTypes, aSubscribedFunction:Function):Void
+    public function new(aType:EventTypes, aSubscribedFunction:Dynamic):Void
     {
         type = aType;
         subscribedFunction = aSubscribedFunction;

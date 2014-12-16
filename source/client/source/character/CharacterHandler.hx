@@ -152,7 +152,8 @@ class CharacterHandler
     public function getOpponentPositionsQuery(aData:Array<Dynamic>):Void
     {
         var userId:String = aData[0];
-        var data:Array<Dynamic> = aData[1];
+        var aResponeEvent:EventTypes = aData[1];
+        var data:Array<Dynamic> = aData[2];
         var a:Array<Point> = [];
 
         for(character in characters)
@@ -168,22 +169,24 @@ class CharacterHandler
             a.push(enemy.getPosition());
         }
 
-        EventBus.dispatch(EventTypes.GetPositionsResult, [a, data]);
+        EventBus.dispatch(aResponeEvent, [a, data]);
     }
 
-    public function getAllyPositionsQuery(aUserId:String):Void
+    public function getAllyPositionsQuery(aData:Array<Dynamic>):Void
     {
+        var userId:String = aData[0];
+        var aResponeEvent:EventTypes = aData[1];
         var a:Array<Point> = [];
 
         for(character in characters)
         {
-            if(character.userId != aUserId)
+            if(character.userId != userId)
             {
                 a.push(character.getPosition());
             }
         }
 
-        EventBus.dispatch(EventTypes.GetPositionsResult, a);
+        EventBus.dispatch(aResponeEvent, a);
     }
 
     public function getAllCharacters():Array<CharacterModel>

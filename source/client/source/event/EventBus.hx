@@ -14,12 +14,13 @@ enum EventTypes
     DeselectCharacter;
     SetCharacterEnabled;
     ShowNextUser;
-    TargetTileSelected;
+    TargetSelected;
     SelectAvatar;
     EndTurn;
     NextTurn;
     UpdateAbilities;
     UpdateAbility;
+    CheckIfPositionIsAbilityTarget;
     UpdateCharacterPosition;
     UpdateCharacterDirection;
     DealDamage;
@@ -27,9 +28,6 @@ enum EventTypes
     Defeated;
     BackgroundClicked;
     UseAbility;
-    UseAbilityGetCharacterPosition;
-    UseAbilityGetTargetTiles;
-    UseAbilityShowTargetTile;
     UseAbilityTargetTileSelected;
     UseAbilityApply;
     CancelAbility;
@@ -37,16 +35,18 @@ enum EventTypes
     GetValidAbilities;
     GetOpponentPositionsQuery;
     GetAllyPositionsQuery;
-    GetPositionsResult;
-    ShowMoveTile;
+    GetAbilityPositionsResult;
+    ShowTargetTileWithId;
+    ShowTargetTileWithPosition;
     SetCharacterPosition;
     MoveCharacterToPosition;
-    HideTargetTiles;
     UpdateCharacterMoves;
+    GetPath;
+    HideTargetTiles;
+    ShowAbilityResultInfo;
     Guard;
+    Taunted;
     AbilityUsed;
-    ShowDamage;
-    ShowBlocked;
     UserWon;
     ResetGame;
 }

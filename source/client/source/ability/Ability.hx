@@ -7,6 +7,7 @@ import enemy.Enemy;
 import character.CharacterHandler;
 import character.CharacterModel;
 import ability.AbilityType;
+import tile.TileHelper;
 
 enum AbilityTargetType
 {
@@ -25,12 +26,14 @@ class Ability
     public var range:Int;
     public var enabled:Bool;
     public var targetType:AbilityTargetType;
+    public var validPositions:Array<Point>;
 
 	public function new(aOwnerId:Int, aAbilityType:String, ?aRange:Int, ?aTargetType:AbilityTargetType)
 	{
         ownerId = aOwnerId;
         abilityType = aAbilityType;
         enabled = false;
+        validPositions = [];
 
         if(aRange != null)
         {
@@ -54,27 +57,61 @@ class Ability
         EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
         EventBus.subscribe(EventTypes.DeselectCharacter, cancelAbility);
         EventBus.subscribe(EventTypes.UseAbilityApply, apply);
+        EventBus.subscribe(EventTypes.GetAbilityPositionsResult, getAbilityPositionsResult);
 	};
 
     private function useAbility(aId:Int):Void
     {
         if(id == aId)
         {
-            EventBus.subscribe(EventTypes.TargetTileSelected, targetTileSelected);
+            EventBus.subscribe(EventTypes.TargetSelected, targetSelected);
             EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
-            EventBus.dispatch(EventTypes.UseAbilityGetCharacterPosition, [ownerId, range, targetType]);
+
+            for (pos in validPositions)
+            {
+                EventBus.dispatch(EventTypes.CheckIfPositionIsAbilityTarget, pos);
+            }
         }
     }
 
-    private function targetTileSelected(aPosition:Point):Void
+    private function getAbilityPositionsResult(aData:Array<Dynamic>):Void
     {
-        EventBus.unsubscribe(EventTypes.TargetTileSelected, targetTileSelected);
+        var positions:Array<Point> = aData[0];
+        var data:Array<Dynamic> = aData[1];
+        var abilityId:Int = data[0];
+        var characterPos:Point = data[1];
+
+        if(abilityId == id)
+        {
+            validPositions = [];
+
+            var withinRange:Bool = false;
+
+            for (position in positions)
+            {
+                var distance:Int = TileHelper.getDistanceBetweenPoint(characterPos, position);
+
+                if(range >= distance)
+                {
+                    withinRange = true;
+                    validPositions.push(position);
+                }
+            }
+
+            EventBus.dispatch(EventTypes.UpdateAbility, [id, withinRange]);
+        }
+    }
+
+    private function targetSelected(aPosition:Point):Void
+    {
+        EventBus.unsubscribe(EventTypes.CancelAbility, cancelAbility);
+        EventBus.unsubscribe(EventTypes.TargetSelected, targetSelected);
         EventBus.dispatch(EventTypes.UseAbilityTargetTileSelected, [id, aPosition]);
     }
 
     private function cancelAbility():Void
     {
-        EventBus.unsubscribe(EventTypes.TargetTileSelected, targetTileSelected);
+        EventBus.unsubscribe(EventTypes.TargetSelected, targetSelected);
         EventBus.unsubscribe(EventTypes.CancelAbility, cancelAbility);
     }
 
@@ -117,6 +154,8 @@ class Ability
                             EventBus.dispatch(EventTypes.DealDamage, [ownerId, targetId]);
 
                         case AbilityType.TAUNT:
+
+                            EventBus.dispatch(EventTypes.Taunted, [ownerId, targetId]);
 
                         default:
                     }

@@ -6,6 +6,23 @@
             "width":10,
             "height":10,
             "enemies":[{"id":1,"position":[2,5]}, {"id":1,"position":[2,8]}],
+            "obstacles":
+            [
+                {"id":2,"position":[9, 3]},
+                {"id":3,"position":[8, 3]},
+                {"id":2,"position":[7, 3]},
+                {"id":2,"position":[6, 3]},
+                {"id":2,"position":[6, 4]},
+                {"id":3,"position":[5, 4]},
+                {"id":2,"position":[5, 4]},
+                {"id":3,"position":[5, 5]},
+                {"id":2,"position":[5, 6]},
+                {"id":3,"position":[5, 7]},
+                {"id":2,"position":[6, 7]},
+                {"id":2,"position":[7, 7]},
+                {"id":2,"position":[7, 8]},
+                {"id":2,"position":[6, 8]}
+            ],
             "startPositions":{"0":[8,1], "1":[8,8]}
         }
     }

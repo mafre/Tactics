@@ -16,19 +16,19 @@ import entity.Entity;
 import motion.Actuate;
 import motion.easing.Quad;
 
-class AttackResultInfo extends Entity
+class AbilityResultInfo extends Entity
 {
     private var tf:TextField;
 
-	public function new(aInfo:String)
+	public function new(aLabel:String, aWidth:Float)
 	{
 		super();
 
         layer = 7;
         tf = TextfieldFactory.getAttackResultInfo();
-        tf.text = aInfo;
+        tf.text = aLabel;
+        tf.scaleX = tf.scaleY = 1/StageInfo.scale;
         addChild(tf);
-        scaleX = scaleY = 1/StageInfo.scale;
     };
 
     public override function init():Void

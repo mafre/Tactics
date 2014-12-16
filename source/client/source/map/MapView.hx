@@ -5,6 +5,9 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.display.Sprite;
 import flash.geom.Point;
+import flash.Vector;
+
+import statm.explore.haxeAStar.IntPoint;
 
 import entity.EntityHandler;
 import entity.EntityType;
@@ -23,6 +26,7 @@ import tile.TargetTile;
 import ability.AbilityHandler;
 import ability.Ability;
 import user.UserHandler;
+import obstacle.Obstacle;
 
 class MapView extends Sprite
 {
@@ -39,11 +43,11 @@ class MapView extends Sprite
         mapModel = aMapModel;
         mapModel.load();
 
-        EventBus.subscribe(EventTypes.SelectCharacter, selectCharacter);
+        EventBus.subscribe(EventTypes.SetActiveCharacter, setActiveCharacter);
         EventBus.subscribe(EventTypes.SetCharacterPosition, setCharacterPosition);
-        EventBus.subscribe(EventTypes.UseAbilityGetTargetTiles, useAbilityGetTargetTiles);
         EventBus.subscribe(EventTypes.UseAbilityTargetTileSelected, useAbilityTargetTileSelected);
         EventBus.subscribe(EventTypes.Defeated, defeated);
+        EventBus.subscribe(EventTypes.GetPath, getPath);
     };
 
     public function loadMap(aId:Int):Void
@@ -65,6 +69,7 @@ class MapView extends Sprite
         tiledMap.addEventListener(MouseEvent.CLICK, tiledMapClicked);
 
         var tileCount = 0;
+
         for (x in 0...map.get_width())
         {
             for (y in 0...map.get_height())
@@ -75,13 +80,7 @@ class MapView extends Sprite
                 EntityHandler.getInstance().addEntity(tile);
                 tile.hide();
                 map.set_target(x, y, tileCount);
-            }
-        }
 
-        for (x in 0...map.get_width())
-        {
-            for (y in 0...map.get_height())
-            {
                 var aType:Int = map.get_enemy(x, y);
 
                 if(aType > 0)
@@ -91,7 +90,18 @@ class MapView extends Sprite
                     enemy.setPosition(new Point(x, y));
                     CharacterHandler.getInstance().addEnemy(enemy);
                     EntityHandler.getInstance().addEntity(enemy);
-                    map.set_enemy(cast(enemy.getPosition().x, Int), cast(enemy.getPosition().y, Int), enemy.id);
+                    map.set_enemy(x, y, enemy.id);
+                }
+
+                var aObstacleType:ObstacleType = map.get_obstacle(x, y);
+
+                if(aObstacleType != ObstacleType.Empty)
+                {
+                    var obstacle:Obstacle = new Obstacle();
+                    obstacle.setType(aObstacleType);
+                    obstacle.setPosition(new Point(x, y));
+                    EntityHandler.getInstance().addEntity(obstacle);
+                    map.set_obstacle(x, y, Type.enumIndex(aObstacleType));
                 }
             };
         };
@@ -115,12 +125,32 @@ class MapView extends Sprite
         EventBus.dispatch(EventTypes.NextTurn);
     }
 
+    private function getPath(aData:Array<Dynamic>):Void
+    {
+        var id:Int = aData[0];
+        var startPos:Point = aData[1];
+        var endPos:Point = aData[2];
+        var m:Vector<IntPoint> = currentMap.getPath(startPos, endPos);
+        var path:Array<Point> = [];
+
+        if(m != null)
+        {
+            for(n in m)
+            {
+                var p:Point = new Point(n.x, n.y);
+                path.push(p);
+            }
+        }
+
+        EventBus.dispatch(EventTypes.MoveCharacterToPosition, [id, path]);
+    }
+
     private function tiledMapClicked(e:MouseEvent):Void
     {
         EventBus.dispatch(EventTypes.DeselectCharacter);
     }
 
-    private function selectCharacter(aData:Array<Dynamic>):Void
+    private function setActiveCharacter(aData:Array<Dynamic>):Void
     {
         var characterId:Int = aData[0];
         var characterPos:Point = aData[1];
@@ -128,6 +158,8 @@ class MapView extends Sprite
         var abilityUsesRemaining:Int = aData[3];
         var distance:Int = 0;
         var tileCount:Int = 0;
+
+        currentMap.setCharacterPosition(characterPos);
 
         for (x in 0...currentMap.get_width())
         {
@@ -137,82 +169,7 @@ class MapView extends Sprite
 
                 if(!currentMap.is_occupied(x, y) && distance <= moves)
                 {
-                    EventBus.dispatch(EventTypes.ShowMoveTile, tileCount);
-                }
-
-                tileCount++;
-            };
-        };
-    }
-
-    private function useAbilityGetTargetTiles(aData:Array<Dynamic>):Void
-    {
-        var enemyPositions:Array<Point> = currentMap.getAllEnemyPositions();
-        var characterPositions:Array<Point> = currentMap.getAllCharacterPositions();
-        var ownerPosition:Point = aData[0];
-        var userId:String = aData[1];
-        var range:Int = aData[2];
-        var type:AbilityTargetType = aData[3];
-
-        var validTargets:Array<Int> = [];
-
-        for (enemyPosition in enemyPositions)
-        {
-            var distance:Int = TileHelper.getDistanceBetweenPoint(ownerPosition, enemyPosition);
-
-            if(range >= distance)
-            {
-                validTargets.push(currentMap.get_enemy(cast(enemyPosition.x, Int), cast(enemyPosition.y, Int)));
-            }
-        }
-
-        for (characterPosition in characterPositions)
-        {
-            var distance:Int = TileHelper.getDistanceBetweenPoint(ownerPosition, characterPosition);
-
-            if(range >= distance)
-            {
-                validTargets.push(currentMap.get_character(cast(characterPosition.x, Int), cast(characterPosition.y, Int)));
-            }
-        }
-
-        var tileCount:Int = 0;
-
-        for (x in 0...currentMap.get_width())
-        {
-            for (y in 0...currentMap.get_height())
-            {
-                for (validTarget in validTargets)
-                {
-                    if(currentMap.get_enemy(x, y) == validTarget)
-                    {
-                        EventBus.dispatch(EventTypes.UseAbilityShowTargetTile, tileCount);
-                    }
-
-                    if(currentMap.get_character(x, y) == validTarget)
-                    {
-                        var id:Int = currentMap.get_character(x, y);
-                        var ownerId:String = CharacterHandler.getInstance().getCharacter(id).userId;
-
-                        switch(type)
-                        {
-                            case AbilityTargetType.Enemy:
-
-                                if(ownerId != userId)
-                                {
-                                    EventBus.dispatch(EventTypes.UseAbilityShowTargetTile, tileCount);
-                                }
-
-                            case AbilityTargetType.Ally:
-
-                                if(ownerId == userId)
-                                {
-                                    EventBus.dispatch(EventTypes.UseAbilityShowTargetTile, tileCount);
-                                }
-
-                            default:
-                        }
-                    }
+                    EventBus.dispatch(EventTypes.ShowTargetTileWithId, tileCount);
                 }
 
                 tileCount++;
@@ -242,8 +199,10 @@ class MapView extends Sprite
     {
         var characterId:Int = aData[0];
         var newPos:Point = aData[1];
-        var abilityUsesRemaining:Int = aData[2];
+
         currentMap.move_character(characterId, cast(newPos.x, Int), cast(newPos.y, Int));
+
+        currentMap.setCharacterPosition(newPos);
     }
 
     private function getValidTargets(aUnitId:Int):Array<Point>

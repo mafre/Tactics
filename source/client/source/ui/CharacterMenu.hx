@@ -42,7 +42,7 @@ class CharacterMenu extends Sprite
         avatar = new Avatar();
         addChild(avatar);
 
-        EventBus.subscribe(EventTypes.SetActiveCharacter, show);
+        EventBus.subscribe(EventTypes.SelectCharacter, show);
         EventBus.subscribe(EventTypes.DeselectCharacter, hide);
         EventBus.subscribe(EventTypes.EndTurn, hide);
         EventBus.subscribe(EventTypes.UpdateCharacterMoves, updateCharacterMoves);

@@ -14,7 +14,7 @@ import entity.EntityHandler;
 import entity.EntityType;
 import entity.Entity;
 import tile.TileBase;
-import ui.AttackResultInfo;
+import ui.AbilityResultInfo;
 
 class Enemy extends TileBase
 {
@@ -33,8 +33,8 @@ class Enemy extends TileBase
 
         EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
         EventBus.subscribe(EventTypes.DealDamage, dealDamage);
-        EventBus.subscribe(EventTypes.ShowBlocked, showBlocked);
         EventBus.subscribe(EventTypes.Defeated, defeated);
+        EventBus.subscribe(EventTypes.ShowAbilityResultInfo, showAbilityResultInfo);
 	}
 
     public function setType(aEnemyType:Int):Void
@@ -79,36 +79,32 @@ class Enemy extends TileBase
     {
         var damageDealerId:Int = aData[9];
         var targetId:Int = aData[1];
-        var value:Int = aData[2];
+        var damage:Int = aData[2];
 
         if(id == targetId)
         {
-            hp -= value;
+            hp -= damage;
+
+            EventBus.dispatch(EventTypes.ShowAbilityResultInfo, [id, "-"+Std.string(damage)]);
 
             if(hp <= 0)
             {
                 EventBus.dispatch(EventTypes.Defeated, [id, damageDealerId]);
                 super.remove();
             }
-            else
-            {
-                var info:AttackResultInfo = new AttackResultInfo(Std.string(value));
-
-                info.x = x + asset.width/2 - info.width/2;
-                info.y = y - asset.height - 3;
-
-                EntityHandler.getInstance().addEntity(info);
-            }
         }
     }
 
-    private function showBlocked(targetId:Int):Void
+    private function showAbilityResultInfo(aData:Array<Dynamic>):Void
     {
+        var targetId:Int = aData[0];
+        var aLabel:String = aData[1];
+
         if(id == targetId)
         {
-            var info:AttackResultInfo = new AttackResultInfo("Blocked");
+            var info:AbilityResultInfo = new AbilityResultInfo(aLabel, asset.width);
 
-            info.x = x + asset.width/2 - info.width/2;
+            info.x = x + asset.width/2;
             info.y = y - asset.height - 3;
 
             EntityHandler.getInstance().addEntity(info);

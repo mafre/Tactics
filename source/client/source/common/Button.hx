@@ -43,7 +43,7 @@ class Button extends Sprite
 		down.visible = true;
 		up.visible = false;
 		addEventListener(MouseEvent.ROLL_OUT, mouseUp);
-		SoundHandler.playEffect("button5");
+		//SoundHandler.playEffect("button5");
 		dispatchEvent(new Event(EventType.BUTTON_PRESSED));
 	}
 

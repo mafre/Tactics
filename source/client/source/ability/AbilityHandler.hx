@@ -30,12 +30,11 @@ class AbilityHandler
         dispatcher = new EventDispatcher();
         abilities = [];
         EventBus.subscribe(EventTypes.GetValidAbilities, getValidAbilities);
-        EventBus.subscribe(EventTypes.GetPositionsResult, getPositionsResult);
     }
 
     public function addAbility(aAbility:Ability):Void
     {
-        aAbility.id = abilities.length;
+        aAbility.id = abilities.length + 3000;
         abilities.push(aAbility);
     }
 
@@ -67,7 +66,7 @@ class AbilityHandler
                 case AbilityTargetType.Enemy:
 
                     var data:Array<Dynamic> = [ability.id, characterPos];
-                    EventBus.dispatch(EventTypes.GetOpponentPositionsQuery, [userId, data]);
+                    EventBus.dispatch(EventTypes.GetOpponentPositionsQuery, [userId, EventTypes.GetAbilityPositionsResult, data]);
 
                 case AbilityTargetType.Self:
 
@@ -77,29 +76,6 @@ class AbilityHandler
 
             }
         }
-    }
-
-    private function getPositionsResult(aData:Array<Dynamic>):Void
-    {
-        var positions:Array<Point> = aData[0];
-        var data:Array<Dynamic> = aData[1];
-        var abilityId:Int = data[0];
-        var characterPos:Point = data[1];
-        var ability:Ability = getAbility(abilityId);
-        var withinRange:Bool = false;
-
-        for (position in positions)
-        {
-            var distance:Int = TileHelper.getDistanceBetweenPoint(characterPos, position);
-
-            if(ability.range >= distance)
-            {
-                withinRange = true;
-                break;
-            }
-        }
-
-        EventBus.dispatch(EventTypes.UpdateAbility, [ability.id, withinRange]);
     }
 
     public function getCharactersAbilities(aCharacterId:Int):Array<Ability>

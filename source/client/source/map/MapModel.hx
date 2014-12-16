@@ -2,10 +2,15 @@ package map;
 
 import flash.display.Sprite;
 import flash.geom.Point;
-import haxe.ds.Vector;
+import flash.Vector;
 import openfl.Assets;
 import haxe.Json;
 import haxe.ds.IntMap;
+
+import statm.explore.haxeAStar.AStar;
+import statm.explore.haxeAStar.IAStarClient;
+import statm.explore.haxeAStar.IntPoint;
+import statm.explore.haxeAStar.Node;
 
 import common.Array2D;
 import common.StageInfo;
@@ -21,6 +26,14 @@ enum GroundType
     Rock;
     Water;
     Ice;
+}
+
+enum ObstacleType
+{
+    Empty;
+    Unknown;
+    Rock1;
+    Tree1;
 }
 
 class MapModel
@@ -66,6 +79,18 @@ class MapModel
                 }
             }
 
+            var obstacles:Array<Dynamic> = level.obstacles;
+            if(obstacles != null)
+            {
+                for (aObstacle in obstacles)
+                {
+                    var id:Int = aObstacle.id;
+                    var position:Array<Int> = aObstacle.position;
+
+                    map.set_obstacle(position[0], position[1], id);
+                }
+            }
+
             maps.push(map);
         };
     };
@@ -76,31 +101,84 @@ class MapModel
     }
 }
 
-class Map
+class Map implements IAStarClient
 {
     private var height : Int;
     private var width : Int;
     private var mapName : String;
     private var startPositions:IntMap<Point>;
+    private var characterPosition:Point;
 
     private var ground_height : Array2D;
     private var ground_type : Array2D;
+    private var obstacles : Array2D;
     private var characters : Array2D;
     private var enemies : Array2D;
     private var target : Array2D;
 
+    public var rowTotal(default, null):Int;
+    public var colTotal(default, null):Int;
+
     public function new(aMapName:String, aWidth:Int, aHeight:Int, aStartPositions:IntMap<Point>)
     {
         mapName = aMapName;
-        height = aHeight;
         width = aWidth;
+        height = aHeight;
         startPositions = aStartPositions;
+
+        rowTotal = aWidth;
+        colTotal = aHeight;
 
         ground_height = new Array2D(width, height);
         ground_type = new Array2D(width, height);
+        obstacles = new Array2D(width, height);
         characters = new Array2D(width, height);
         enemies = new Array2D(width, height);
         target = new Array2D(width, height);
+    }
+
+    public function setCharacterPosition(aPosition:Point):Void
+    {
+        characterPosition = aPosition;
+        AStar.getAStarInstance(this).updateMap();
+    }
+
+    public function isWalkable(x:Int, y:Int):Bool
+    {
+        if(get_character(x, y) != 0)
+        {
+            if(characterPosition.x == x && characterPosition.y == y)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        if(get_enemy(x, y) != 0)
+        {
+            return false;
+        }
+
+        if(get_obstacle(x, y) != ObstacleType.Empty)
+        {
+            return false;
+        }
+
+        return !is_occupied(x, y);
+    }
+
+    public function getPath(startPos:Point, endPos:Point):Vector<IntPoint>
+    {
+        var p1:IntPoint = new IntPoint();
+        p1.x = Std.int(startPos.x);
+        p1.y = Std.int(startPos.y);
+
+        var p2:IntPoint = new IntPoint();
+        p2.x = Std.int(endPos.x);
+        p2.y = Std.int(endPos.y);
+
+        return AStar.getAStarInstance(this).findPath(p1, p2);
     }
 
     public function get_mapName():String
@@ -130,7 +208,7 @@ class Map
 
     public function is_occupied(i : Int, j : Int) : Bool
     {
-        if(enemies.get(i, j) > 0 || characters.get(i, j) > 0)
+        if( (Type.createEnumIndex(ObstacleType, obstacles.get(i, j)) != ObstacleType.Empty) || (enemies.get(i, j) > 0) || (characters.get(i, j) > 0))
         {
             return true;
         }
@@ -161,6 +239,21 @@ class Map
         }
 
         return Type.createEnumIndex(GroundType, ground_type.get(i, j));
+    }
+
+    public function get_obstacle(i : Int, j : Int) : ObstacleType
+    {
+        if (is_outside(i, j))
+        {
+            return ObstacleType.Unknown;
+        }
+
+        return Type.createEnumIndex(ObstacleType, obstacles.get(i, j));
+    }
+
+    public function set_obstacle(i : Int, j : Int, aValue : Int) : Void
+    {
+        obstacles.set(i, j, aValue);
     }
 
     public function get_target(i : Int, j : Int) : Int

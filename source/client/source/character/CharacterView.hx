@@ -18,13 +18,22 @@ import event.EventBus;
 import utils.SoundHandler;
 import tile.TileBase;
 import tile.TileHelper;
-import ui.AttackResultInfo;
+import ui.AbilityResultInfo;
+import motion.Actuate;
+
+enum CharacterSelectState
+{
+    None;
+    Move;
+    AbilityTarget;
+}
 
 class CharacterView extends TileBase
 {
     public var id:Int;
     private var asset:Animation;
     private var enabled:Sprite;
+    private var state:CharacterSelectState;
 
 	public function new(aId:Int, aPath:String)
 	{
@@ -33,6 +42,7 @@ class CharacterView extends TileBase
         type = EntityType.CHARACTER;
         layer = 3;
         id = aId;
+        state = CharacterSelectState.None;
 
         enabled = new Image("img/user/enabled.png");
         addChild(enabled);
@@ -47,12 +57,56 @@ class CharacterView extends TileBase
         asset.x = TileHelper.tileWidth - asset.width/2;
         asset.y = TileHelper.tileHeight - asset.height;
 
+        EventBus.subscribe(EventTypes.CheckIfPositionIsAbilityTarget, checkIfPositionIsAbilityTarget);
         EventBus.subscribe(EventTypes.MoveCharacterToPosition, moveToPosition);
         EventBus.subscribe(EventTypes.SetCharacterEnabled, setEnabled);
-        EventBus.subscribe(EventTypes.ShowDamage, showDamage);
-        EventBus.subscribe(EventTypes.ShowBlocked, showBlocked);
+        EventBus.subscribe(EventTypes.ShowAbilityResultInfo, showAbilityResultInfo);
         EventBus.subscribe(EventTypes.Defeated, defeated);
+
+        addEventListener(MouseEvent.CLICK, characterClicked);
 	};
+
+    private function characterClicked(e:MouseEvent):Void
+    {
+        switch (state)
+        {
+            case CharacterSelectState.None:
+
+            case CharacterSelectState.Move:
+
+                selectCharacter(id);
+
+            case CharacterSelectState.AbilityTarget:
+
+                EventBus.dispatch(EventTypes.TargetSelected, super.getPosition());
+
+                if(enabled.visible)
+                {
+                    state = CharacterSelectState.Move;
+                }
+                else
+                {
+                    state = CharacterSelectState.None;
+                }
+        }
+    }
+
+    private function selectCharacter(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            EventBus.dispatch(EventTypes.DeselectCharacter);
+            EventBus.dispatch(EventTypes.SelectCharacter, [id, super.getPosition()]);
+        }
+    }
+
+    private function checkIfPositionIsAbilityTarget(aPosition:Point):Void
+    {
+        if (super.getPosition().x == aPosition.x && super.getPosition().y == aPosition.y)
+        {
+            state = CharacterSelectState.AbilityTarget;
+        }
+    }
 
     private function setEnabled(aData:Array<Dynamic>):Void
     {
@@ -62,40 +116,27 @@ class CharacterView extends TileBase
 
             enabled.visible = isEnabled;
 
-            if(isEnabled)
+            if(!isEnabled)
             {
-                addEventListener(MouseEvent.CLICK, characterClicked);
+                state = CharacterSelectState.None;
             }
             else
             {
-                removeEventListener(MouseEvent.CLICK, characterClicked);
+                state = CharacterSelectState.Move;
             }
         }
     }
 
-    private function showDamage(aData:Array<Dynamic>):Void
+    private function showAbilityResultInfo(aData:Array<Dynamic>):Void
     {
         var targetId:Int = aData[0];
-        var value:Int = aData[1];
+        var aLabel:String = aData[1];
 
         if(id == targetId)
         {
-            var info:AttackResultInfo = new AttackResultInfo(Std.string(value));
+            var info:AbilityResultInfo = new AbilityResultInfo(aLabel, asset.width);
 
-            info.x = x + asset.width/2 - info.width/2;
-            info.y = y - asset.height - 3;
-
-            EntityHandler.getInstance().addEntity(info);
-        }
-    }
-
-    private function showBlocked(targetId:Int):Void
-    {
-        if(id == targetId)
-        {
-            var info:AttackResultInfo = new AttackResultInfo("Blocked");
-
-            info.x = x + asset.width/2 - info.width/2;
+            info.x = x;
             info.y = y - asset.height - 3;
 
             EntityHandler.getInstance().addEntity(info);
@@ -112,29 +153,20 @@ class CharacterView extends TileBase
         }
     }
 
-
-    private function characterClicked(e:MouseEvent):Void
-    {
-        selectCharacter(id);
-    }
-
-    private function selectCharacter(aId:Int):Void
-    {
-        if(id == aId)
-        {
-            EventBus.dispatch(EventTypes.DeselectCharacter);
-            EventBus.dispatch(EventTypes.SetActiveCharacter, [id, super.getPosition()]);
-        }
-    }
-
     private function moveToPosition(aData:Array<Dynamic>):Void
     {
         var aId:Int = aData[0];
-        var aPos:Point = aData[1];
+        var path:Array<Point> = aData[1];
 
-        if(id == aId)
+        if(aId == id)
         {
-            super.setPosition(aPos);
+            for (i in 0...path.length)
+            {
+                Actuate.timer(0.3*i).onComplete(function()
+                {
+                    setPosition(path[i]);
+                });
+            }
         }
     }
 

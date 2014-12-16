@@ -21,6 +21,7 @@ class TargetTile extends TileBase
 {
     private var asset:Image;
     private var id:Int;
+    private var highlight:Bool;
 
     public function new(aId:Int):Void
     {
@@ -29,68 +30,79 @@ class TargetTile extends TileBase
         id = aId;
         asset = new Image("img/tile/target.png");
         addChild(asset);
-        addEventListener(MouseEvent.ROLL_OVER, rollOverTarget);
-        addEventListener(MouseEvent.ROLL_OUT, rollOutTarget);
         type = EntityType.TARGET_TILE;
+        highlight = true;
         layer = 1;
 
-        EventBus.subscribe(EventTypes.ShowMoveTile, showMoveTile);
+        addEventListener(MouseEvent.ROLL_OVER, rollOverTarget);
+        addEventListener(MouseEvent.ROLL_OUT, rollOutTarget);
+
+        EventBus.subscribe(EventTypes.ShowTargetTileWithId, showTargetTileWithId);
+        EventBus.subscribe(EventTypes.ShowTargetTileWithPosition, showTargetTileWithPosition);
+        EventBus.subscribe(EventTypes.CheckIfPositionIsAbilityTarget, checkIfPositionIsAbilityTarget);
+        EventBus.subscribe(EventTypes.TargetSelected, TargetSelected);
         EventBus.subscribe(EventTypes.HideTargetTiles, hide);
         EventBus.subscribe(EventTypes.DeselectCharacter, hide);
-        EventBus.subscribe(EventTypes.UseAbilityShowTargetTile, showAbilityTargetTile);
         EventBus.subscribe(EventTypes.CancelAbility, hide);
         EventBus.subscribe(EventTypes.EndTurn, hide);
+
+        addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
     };
 
-    private function showMoveTile(aId:Int):Void
+    private function mouseDown(e:MouseEvent):Void
     {
-        if (id == aId)
-        {
-            show();
-            addEventListener(MouseEvent.MOUSE_DOWN, moveCharacter);
-        }
+        EventBus.dispatch(EventTypes.TargetSelected, super.getPosition());
     }
 
-    private function showAbilityTargetTile(aId:Int):Void
+    private function TargetSelected(aId:Int):Void
     {
-        if (id == aId)
-        {
-            show();
-            addEventListener(MouseEvent.MOUSE_DOWN, selectAbilityTarget);
-        }
-    }
-
-    private function selectAbilityTarget(e:MouseEvent):Void
-    {
-        removeEventListener(MouseEvent.MOUSE_DOWN, selectAbilityTarget);
-        EventBus.dispatch(EventTypes.TargetTileSelected, super.getPosition());
-        EventBus.dispatch(EventTypes.HideTargetTiles);
-    }
-
-    private function deselectCharacter():Void
-    {
-        removeEventListener(MouseEvent.MOUSE_DOWN, moveCharacter);
         hide();
     }
 
-    private function moveCharacter(e:MouseEvent):Void
+    private function showTargetTileWithId(aId:Int):Void
     {
-        removeEventListener(MouseEvent.MOUSE_DOWN, moveCharacter);
-        EventBus.dispatch(EventTypes.TargetTileSelected, super.getPosition());
-        EventBus.dispatch(EventTypes.HideTargetTiles);
+        if (id == aId)
+        {
+            highlight = true;
+            show();
+        }
+    }
+
+    private function checkIfPositionIsAbilityTarget(aPosition:Point):Void
+    {
+        if (super.getPosition().x == aPosition.x && super.getPosition().y == aPosition.y)
+        {
+            highlight = false;
+            show();
+        }
+    }
+
+    private function showTargetTileWithPosition(aPosition:Point):Void
+    {
+        if (super.getPosition().x == aPosition.x && super.getPosition().y == aPosition.y)
+        {
+            highlight = false;
+            show();
+        }
     }
 
     private function rollOverTarget(e:MouseEvent):Void
     {
-        removeChild(asset);
-        asset = new Image("img/tile/targetHighlight.png");
-        addChild(asset);
+        if(highlight)
+        {
+            removeChild(asset);
+            asset = new Image("img/tile/targetHighlight.png");
+            addChild(asset);
+        }
     }
 
     private function rollOutTarget(e:MouseEvent):Void
     {
-        removeChild(asset);
-        asset = new Image("img/tile/target.png");
-        addChild(asset);
+        if(highlight)
+        {
+            removeChild(asset);
+            asset = new Image("img/tile/target.png");
+            addChild(asset);
+        }
     }
 }

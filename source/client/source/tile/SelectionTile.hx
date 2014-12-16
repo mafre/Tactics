@@ -34,13 +34,13 @@ class SelectionTile extends TileBase
 
         setPosition(new Point(0, 0));
 
-        EventBus.subscribe(EventTypes.SelectCharacter, selectCharacter);
+        EventBus.subscribe(EventTypes.SetActiveCharacter, setActiveCharacter);
         EventBus.subscribe(EventTypes.DeselectCharacter, hide);
         EventBus.subscribe(EventTypes.EndTurn, hide);
         EventBus.subscribe(EventTypes.MoveCharacterToPosition, moveCharacterToPosition);
     };
 
-    private function selectCharacter(aData:Array<Dynamic>):Void
+    private function setActiveCharacter(aData:Array<Dynamic>):Void
     {
         var characterPos:Point = aData[1];
 
@@ -50,8 +50,6 @@ class SelectionTile extends TileBase
 
     private function moveCharacterToPosition(aData:Array<Dynamic>):Void
     {
-        var characterPos:Point = aData[1];
-
-        setPosition(characterPos);
+        hide();
     }
 }

@@ -33,6 +33,7 @@ enum ObstacleType
     Empty;
     Unknown;
     Rock1;
+    Rock2;
     Tree1;
 }
 

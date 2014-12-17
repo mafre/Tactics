@@ -4,6 +4,7 @@ import flash.geom.Point;
 
 import tile.TileBase;
 import character.CharacterModel;
+import character.CharacterView;
 
 class TileHelper
 {
@@ -29,11 +30,8 @@ class TileHelper
         return Math.floor(xDistance + yDistance);
     }
 
-    public static function getDirection(startTile:TileBase, endTile:TileBase):Direction
+    public static function getDirection(startPos:Point, endPos:Point ):Direction
     {
-        var startPos:Point = startTile.getPosition();
-        var endPos:Point = endTile.getPosition();
-
         var xDistance = endPos.x - startPos.x;
         var yDistance = endPos.y - startPos.y;
 

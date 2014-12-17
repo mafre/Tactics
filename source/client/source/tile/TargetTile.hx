@@ -32,7 +32,7 @@ class TargetTile extends TileBase
         addChild(asset);
         type = EntityType.TARGET_TILE;
         highlight = true;
-        layer = 1;
+        layer = 4;
 
         addEventListener(MouseEvent.ROLL_OVER, rollOverTarget);
         addEventListener(MouseEvent.ROLL_OUT, rollOutTarget);

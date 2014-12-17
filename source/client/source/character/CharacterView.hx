@@ -28,21 +28,40 @@ enum CharacterSelectState
     AbilityTarget;
 }
 
+enum Direction
+{
+    Up;
+    Right;
+    Down;
+    Left;
+}
+
+enum CharacterState
+{
+    Idle;
+    Walk;
+    Attack;
+}
+
 class CharacterView extends TileBase
 {
     public var id:Int;
     private var asset:Animation;
     private var enabled:Sprite;
-    private var state:CharacterSelectState;
+    private var selectState:CharacterSelectState;
+    public var direction:Direction;
+    public var state:CharacterState;
 
-	public function new(aId:Int, aPath:String)
+	public function new(aId:Int)
 	{
         super();
 
         type = EntityType.CHARACTER;
         layer = 3;
         id = aId;
-        state = CharacterSelectState.None;
+        selectState = CharacterSelectState.None;
+        state = CharacterState.Idle;
+        direction = Direction.Down;
 
         enabled = new Image("img/user/enabled.png");
         addChild(enabled);
@@ -51,11 +70,11 @@ class CharacterView extends TileBase
         asset = new Animation(true);
         asset.setFrames([1, 2]);
         asset.setDelay(12);
-        asset.setPath(aPath);
+        asset.setPath(getAssetPath());
         addChild(asset);
         asset.start();
         asset.x = TileHelper.tileWidth - asset.width/2;
-        asset.y = TileHelper.tileHeight - asset.height;
+        asset.y = TileHelper.tileHeight*1.5 - asset.height;
 
         EventBus.subscribe(EventTypes.CheckIfPositionIsAbilityTarget, checkIfPositionIsAbilityTarget);
         EventBus.subscribe(EventTypes.MoveCharacterToPosition, moveToPosition);
@@ -68,7 +87,7 @@ class CharacterView extends TileBase
 
     private function characterClicked(e:MouseEvent):Void
     {
-        switch (state)
+        switch (selectState)
         {
             case CharacterSelectState.None:
 
@@ -82,11 +101,11 @@ class CharacterView extends TileBase
 
                 if(enabled.visible)
                 {
-                    state = CharacterSelectState.Move;
+                    selectState = CharacterSelectState.Move;
                 }
                 else
                 {
-                    state = CharacterSelectState.None;
+                    selectState = CharacterSelectState.None;
                 }
         }
     }
@@ -104,7 +123,7 @@ class CharacterView extends TileBase
     {
         if (super.getPosition().x == aPosition.x && super.getPosition().y == aPosition.y)
         {
-            state = CharacterSelectState.AbilityTarget;
+            selectState = CharacterSelectState.AbilityTarget;
         }
     }
 
@@ -118,11 +137,11 @@ class CharacterView extends TileBase
 
             if(!isEnabled)
             {
-                state = CharacterSelectState.None;
+                selectState = CharacterSelectState.None;
             }
             else
             {
-                state = CharacterSelectState.Move;
+                selectState = CharacterSelectState.Move;
             }
         }
     }
@@ -165,6 +184,12 @@ class CharacterView extends TileBase
                 Actuate.timer(0.3*i).onComplete(function()
                 {
                     setPosition(path[i]);
+
+                    if(i != 0)
+                    {
+                        direction = TileHelper.getDirection(path[i-1], path[i]);
+                        asset.setPath(getAssetPath());
+                    }
                 });
             }
         }
@@ -174,4 +199,47 @@ class CharacterView extends TileBase
     {
         asset.update();
     };
+
+    public function getAssetPath():String
+    {
+        //var assetPath:String = "img/character/" + path + "/";
+
+        var assetPath:String = "img/character/default/";
+
+        switch (state)
+        {
+            case CharacterState.Idle:
+
+                assetPath += "idle/";
+
+            case CharacterState.Walk:
+
+                assetPath += "walk/";
+
+            case CharacterState.Attack:
+
+                assetPath += "attack/";
+        }
+
+        switch (direction)
+        {
+            case Direction.Up:
+
+                assetPath += "up";
+
+            case Direction.Right:
+
+                assetPath += "right";
+
+            case Direction.Down:
+
+                assetPath += "down";
+
+            case Direction.Left:
+
+                assetPath += "left";
+        }
+
+        return assetPath;
+    }
 }

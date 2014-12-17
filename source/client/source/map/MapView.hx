@@ -113,7 +113,7 @@ class MapView extends Sprite
             for (i in 0...characterModels.length)
             {
                 var characterModel:CharacterModel = characterModels[i];
-                var characterView:CharacterView = new CharacterView(characterModel.id, characterModel.getAssetPath());
+                var characterView:CharacterView = new CharacterView(characterModel.id);
                 var startPosition:Point = new Point(map.get_start_x_position(user.playOrder), map.get_start_y_position(user.playOrder)+i);
                 map.set_character(cast(startPosition.x, Int), cast(startPosition.y, Int), characterModel.id);
                 characterModel.initPosition(startPosition);

@@ -11,6 +11,7 @@ import common.StageInfo;
 import common.GridSprite;
 import tile.TileType;
 import tile.TileBase;
+import tile.TileHelper;
 import common.Image;
 import entity.Entity;
 import entity.EntityType;
@@ -28,6 +29,8 @@ class Obstacle extends TileBase
         super();
         type = EntityType.OBSTACLE;
         layer = 3;
+        mouseEnabled = false;
+        mouseChildren = false;
     };
 
     public function setType(aObstacleType:ObstacleType):Void
@@ -38,7 +41,12 @@ class Obstacle extends TileBase
         {
             case ObstacleType.Rock1:
 
-                asset = new Image("img/obstacle/stone1.png");
+                asset = new Image("img/obstacle/rock1.png");
+                addChild(asset);
+
+            case ObstacleType.Rock2:
+
+                asset = new Image("img/obstacle/rock2.png");
                 addChild(asset);
 
             case ObstacleType.Tree1:
@@ -49,9 +57,7 @@ class Obstacle extends TileBase
             default:
         };
 
-        var tile:Sprite = new Image("img/tile/default.png");
-
-        asset.x = tile.width/2 - asset.width/2;
-        asset.y = tile.height/2 - asset.height;
+        asset.x = TileHelper.tileWidth - asset.width/2;
+        asset.y = TileHelper.tileHeight*2 - asset.height;
     }
 }

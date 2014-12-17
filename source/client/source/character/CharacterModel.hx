@@ -8,21 +8,6 @@ import ability.AbilityHandler;
 
 import event.EventType;
 
-enum Direction
-{
-    Up;
-    Right;
-    Down;
-    Left;
-}
-
-enum CharacterState
-{
-    Idle;
-    Walk;
-    Attack;
-}
-
 enum CharacterType
 {
 	Banshee;
@@ -57,8 +42,6 @@ class CharacterModel
     public var name:String;
     public var path:String;
     public var type:CharacterType;
-    public var direction:Direction;
-    public var state:CharacterState;
     public var enabled:Bool;
     private var guard:Bool;
 
@@ -73,9 +56,6 @@ class CharacterModel
 
 		userId = aUserId;
         type = aType;
-
-        state = CharacterState.Idle;
-        direction = Direction.Down;
 
 		switch(type)
         {
@@ -456,46 +436,5 @@ class CharacterModel
     public function getHPPercent():Float
     {
         return hp/getMaxHP();
-    }
-
-    public function getAssetPath():String
-    {
-        var assetPath:String = "img/character/" + path + "/";
-
-        switch (state)
-        {
-            case CharacterState.Idle:
-
-                assetPath += "idle/";
-
-            case CharacterState.Walk:
-
-                assetPath += "walk/";
-
-            case CharacterState.Attack:
-
-                assetPath += "attack/";
-        }
-
-        switch (direction)
-        {
-            case Direction.Up:
-
-                assetPath += "up";
-
-            case Direction.Right:
-
-                assetPath += "right";
-
-            case Direction.Down:
-
-                assetPath += "down";
-
-            case Direction.Left:
-
-                assetPath += "left";
-        }
-
-        return assetPath;
     }
 }

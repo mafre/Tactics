@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
 
-	<meta title="BattleWar" package="com.Delphic.BattleWar" version="1.0.0" company="Delphic" />
+	<meta title="Tactics" package="com.Delphic.Tactics" version="1.0.0" company="Delphic" />
 	<app main="Main" path="export" file="tactics" />
 
 	<window fps="60" orientation="landscape" hardware="true"/>

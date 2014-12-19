@@ -190,6 +190,18 @@ class Animation extends Sprite
 		dispatchEvent(new Event(EventType.ANIMATION_UPDATE));
 	}
 
+    public function setIndex(aIndex:Int):Void
+    {
+        if(current != null)
+        {
+            current.visible = false;
+        }
+
+        index = aIndex;
+        current = images[index];
+        current.visible = true;
+    }
+
 	public function update():Void
 	{
 		delay--;

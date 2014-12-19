@@ -62,4 +62,12 @@ class TileHelper
 
         return direction;
     }
+
+    public static function getStagePosition(aPoint:Point):Point
+    {
+        var x:Float = (aPoint.x - aPoint.y - 1) * TileHelper.tileWidth;
+        var y:Float = (aPoint.x + aPoint.y) * TileHelper.tileHeight;
+
+        return new Point(x, y);
+    }
 }

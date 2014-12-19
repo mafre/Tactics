@@ -233,7 +233,7 @@ class CharacterModel
     private function positionSelected(aPosition:Point):Void
     {
         EventBus.unsubscribe(EventTypes.TargetSelected, positionSelected);
-        EventBus.dispatch(EventTypes.SetCharacterPosition, [id, aPosition]);
+        EventBus.dispatch(EventTypes.GetPath, [id, pos, aPosition]);
     }
 
     private function setPosition(aData:Array<Dynamic>):Void
@@ -244,11 +244,7 @@ class CharacterModel
         {
             var newPos:Point = aData[1];
 
-            EventBus.dispatch(EventTypes.GetPath, [id, pos, newPos]);
-
             pos = newPos;
-
-            EventBus.unsubscribe(EventTypes.TargetSelected, setPosition);
 
             updateAbilities(id);
         }

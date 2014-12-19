@@ -142,7 +142,15 @@ class MapView extends Sprite
             }
         }
 
-        EventBus.dispatch(EventTypes.MoveCharacterToPosition, [id, path]);
+        if(path.length > 0)
+        {
+            EventBus.dispatch(EventTypes.SetCharacterPosition, [id, endPos]);
+            EventBus.dispatch(EventTypes.MoveCharacterToPosition, [id, path]);
+        }
+        else
+        {
+            EventBus.dispatch(EventTypes.ShowAbilityResultInfo, [id, "No path found"]);
+        }
     }
 
     private function tiledMapClicked(e:MouseEvent):Void

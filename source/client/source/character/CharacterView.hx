@@ -20,6 +20,10 @@ import tile.TileBase;
 import tile.TileHelper;
 import ui.AbilityResultInfo;
 import motion.Actuate;
+import motion.easing.Linear;
+
+import com.roxstudio.haxe.gesture.RoxGestureAgent;
+import com.roxstudio.haxe.gesture.RoxGestureEvent;
 
 enum CharacterSelectState
 {
@@ -83,9 +87,17 @@ class CharacterView extends TileBase
         EventBus.subscribe(EventTypes.Defeated, defeated);
 
         addEventListener(MouseEvent.CLICK, characterClicked);
+
+        var roxAgent:RoxGestureAgent = new RoxGestureAgent(this, RoxGestureAgent.GESTURE);
+        addEventListener(RoxGestureEvent.GESTURE_TAP, onTap);
 	};
 
-    private function characterClicked(e:MouseEvent):Void
+    private function onTap(e:RoxGestureEvent):Void
+    {
+        characterClicked();
+    }
+
+    private function characterClicked(?e:MouseEvent):Void
     {
         switch (selectState)
         {
@@ -179,16 +191,23 @@ class CharacterView extends TileBase
 
         if(aId == id)
         {
-            for (i in 0...path.length)
+            for (i in 1...path.length)
             {
-                Actuate.timer(0.3*i).onComplete(function()
+                Actuate.timer(0.3*(i-1)).onComplete(function()
                 {
-                    setPosition(path[i]);
+                    var p:Point = TileHelper.getStagePosition(path[i]);
+
+                    Actuate.tween(this, 0.3, { x: p.x, y: p.y }, false).ease(Linear.easeNone);
 
                     if(i != 0)
                     {
-                        direction = TileHelper.getDirection(path[i-1], path[i]);
-                        asset.setPath(getAssetPath());
+                        var newDirection:Direction = TileHelper.getDirection(path[i-1], path[i]);
+
+                        if(direction != newDirection)
+                        {
+                            direction = newDirection;
+                            asset.setPath(getAssetPath());
+                        }
                     }
                 });
             }

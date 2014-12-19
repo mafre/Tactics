@@ -9,6 +9,8 @@ import common.StageInfo;
 import entity.Entity;
 import entity.EntityType;
 
+import haxe.ds.IntMap;
+
 class EntityHandler
 {
 	static private var __instance:EntityHandler;
@@ -18,11 +20,13 @@ class EntityHandler
 	private var items:Array<Entity>;
     private var remove:Array<Entity>;
     private var layers:Array<Sprite>;
+    private var layerItems:IntMap<Array<Entity>>;
 
     public function new():Void
     {
         dispatcher = new EventDispatcher();
         items = new Array<Entity>();
+        layerItems = new IntMap<Array<Entity>>();
     };
 
     public function setContainer(container:Sprite):Void
@@ -35,6 +39,7 @@ class EntityHandler
             var layer:Sprite = new Sprite();
             layers.push(layer);
             container.addChild(layer);
+            layerItems.set(i, new Array<Entity>());
         };
     };
 
@@ -42,6 +47,7 @@ class EntityHandler
     {
         items.push(entity);
         layers[entity.layer].addChild(entity);
+        layerItems.get(entity.layer).push(entity);
         entity.init();
     };
 
@@ -59,8 +65,16 @@ class EntityHandler
             entity.parent.removeChild(entity);
         };
 
+        layerItems.get(entity.layer).remove(entity);
         items.remove(entity);
     };
+
+    private function sortByY(a:Sprite, b:Sprite):Int
+    {
+        if (a.y == b.y) return 0;
+        if (a.y > b.y) return 1;
+        return -1;
+    }
 
     public function update():Void
     {
@@ -85,6 +99,22 @@ class EntityHandler
         for (entity in items)
         {
             entity.update();
+        };
+
+        var i:Int;
+
+        for (i in 0...9)
+        {
+            var a:Array<Entity> = layerItems.get(i);
+            a.sort(sortByY);
+
+            for (i in 0...a.length)
+            {
+                if(a[i].parent != null)
+                {
+                    a[i].parent.setChildIndex(a[i], i);
+                }
+            }
         };
     };
 

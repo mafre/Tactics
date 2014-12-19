@@ -17,6 +17,9 @@ import entity.EntityType;
 import event.EventType;
 import event.EventBus;
 
+import com.roxstudio.haxe.gesture.RoxGestureAgent;
+import com.roxstudio.haxe.gesture.RoxGestureEvent;
+
 class TargetTile extends TileBase
 {
     private var asset:Image;
@@ -47,9 +50,17 @@ class TargetTile extends TileBase
         EventBus.subscribe(EventTypes.EndTurn, hide);
 
         addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
+
+        var roxAgent:RoxGestureAgent = new RoxGestureAgent(this, RoxGestureAgent.GESTURE);
+        addEventListener(RoxGestureEvent.GESTURE_TAP, onTap);
     };
 
-    private function mouseDown(e:MouseEvent):Void
+    private function onTap(e:RoxGestureEvent):Void
+    {
+        mouseDown();
+    }
+
+    private function mouseDown(?e:MouseEvent):Void
     {
         EventBus.dispatch(EventTypes.TargetSelected, super.getPosition());
     }

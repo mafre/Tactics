@@ -28,7 +28,7 @@ class Obstacle extends TileBase
     {
         super();
         type = EntityType.OBSTACLE;
-        layer = 3;
+        layer = 4;
         mouseEnabled = false;
         mouseChildren = false;
     };

@@ -116,7 +116,7 @@ class CharacterMenu extends Sprite
             moves.y = avatar.y + avatar.height - moves.height;
 
             health.x = 10;
-            health.y = avatar.y - health.height;
+            health.y = avatar.y - health.height - 10;
 
             abilityContainer.x = StageInfo.stageWidth - abilityContainer.width - 10;
             abilityContainer.y = StageInfo.stageHeight - abilityContainer.height - 10;

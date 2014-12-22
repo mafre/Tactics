@@ -61,13 +61,13 @@ class CharacterView extends TileBase
         super();
 
         type = EntityType.CHARACTER;
-        layer = 3;
+        layer = 4;
         id = aId;
         selectState = CharacterSelectState.None;
         state = CharacterState.Idle;
         direction = Direction.Down;
 
-        enabled = new Image("img/user/enabled.png");
+        enabled = new Image("img/character/enabled.png");
         addChild(enabled);
         enabled.visible = false;
 
@@ -80,10 +80,10 @@ class CharacterView extends TileBase
         asset.x = TileHelper.tileWidth - asset.width/2;
         asset.y = TileHelper.tileHeight*1.5 - asset.height;
 
-        EventBus.subscribe(EventTypes.CheckIfPositionIsAbilityTarget, checkIfPositionIsAbilityTarget);
         EventBus.subscribe(EventTypes.MoveCharacterToPosition, moveToPosition);
         EventBus.subscribe(EventTypes.SetCharacterEnabled, setEnabled);
         EventBus.subscribe(EventTypes.ShowAbilityResultInfo, showAbilityResultInfo);
+        EventBus.subscribe(EventTypes.SetAbilityTarget, setAbilityTarget);
         EventBus.subscribe(EventTypes.Defeated, defeated);
 
         addEventListener(MouseEvent.CLICK, characterClicked);
@@ -131,14 +131,6 @@ class CharacterView extends TileBase
         }
     }
 
-    private function checkIfPositionIsAbilityTarget(aPosition:Point):Void
-    {
-        if (super.getPosition().x == aPosition.x && super.getPosition().y == aPosition.y)
-        {
-            selectState = CharacterSelectState.AbilityTarget;
-        }
-    }
-
     private function setEnabled(aData:Array<Dynamic>):Void
     {
         if(id == aData[0])
@@ -155,6 +147,14 @@ class CharacterView extends TileBase
             {
                 selectState = CharacterSelectState.Move;
             }
+        }
+    }
+
+    private function setAbilityTarget(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            selectState = CharacterSelectState.AbilityTarget;
         }
     }
 
@@ -191,6 +191,8 @@ class CharacterView extends TileBase
 
         if(aId == id)
         {
+            super.setPositionNoUpdate(path[path.length-1]);
+
             for (i in 1...path.length)
             {
                 Actuate.timer(0.3*(i-1)).onComplete(function()

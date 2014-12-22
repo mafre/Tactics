@@ -29,7 +29,7 @@ class Enemy extends TileBase
 	{
 		super();
         type = EntityType.ENEMY;
-        layer = 3;
+        layer = 4;
 
         EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
         EventBus.subscribe(EventTypes.DealDamage, dealDamage);

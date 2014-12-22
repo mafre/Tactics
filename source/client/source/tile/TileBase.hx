@@ -33,6 +33,11 @@ class TileBase extends Entity
         updatePosition();
     }
 
+    public function setPositionNoUpdate(aPosition:Point):Void
+    {
+        position = aPosition;
+    }
+
     public function updatePosition():Void
     {
         x = (position.x - position.y - 1) * TileHelper.tileWidth;

@@ -68,14 +68,14 @@ class CharacterModel
 
                 name = "Baldur";
                 path = "blacksmith";
-                str = 10;
+                str = 5;
                 vit = 20;
 
             case CharacterType.Berserk:
 
                 name = "Ljotur";
                 path = "berserk";
-                str = 15;
+                str = 5;
                 vit = 15;
 
             case CharacterType.Priest:
@@ -88,13 +88,13 @@ class CharacterModel
                 name = "Fantur";
                 path = "rogue";
                 agi = 20;
-                str = 10;
+                str = 5;
 
             case CharacterType.Knight:
 
                 name = "Trausti";
                 path = "knight";
-                str = 10;
+                str = 5;
                 vit = 15;
                 agi = 10;
 
@@ -108,7 +108,7 @@ class CharacterModel
                 name = "Tjofur";
                 path = "thief";
                 agi = 30;
-                str = 10;
+                str = 5;
                 vit = 10;
 
             case CharacterType.Druid:
@@ -129,6 +129,7 @@ class CharacterModel
         EventBus.subscribe(EventTypes.DeselectCharacter, deselectCharacter);
         EventBus.subscribe(EventTypes.SetCharacterPosition, setPosition);
         EventBus.subscribe(EventTypes.MoveCharacterToPosition, moveCharacterToPosition);
+        EventBus.subscribe(EventTypes.CheckIfPositionIsAbilityTarget, checkIfPositionIsAbilityTarget);
         EventBus.subscribe(EventTypes.UseAbility, useAbility);
         EventBus.subscribe(EventTypes.DealDamage, dealDamage);
         EventBus.subscribe(EventTypes.TakeDamage, takeDamage);
@@ -261,6 +262,14 @@ class CharacterModel
             mov -= (path.length-1);
 
             EventBus.dispatch(EventTypes.UpdateCharacterMoves, getMovesText());
+        }
+    }
+
+    private function checkIfPositionIsAbilityTarget(aPosition:Point):Void
+    {
+        if (pos.x == aPosition.x && pos.y == aPosition.y)
+        {
+            EventBus.dispatch(EventTypes.SetAbilityTarget, id);
         }
     }
 

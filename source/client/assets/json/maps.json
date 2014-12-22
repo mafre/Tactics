@@ -3,8 +3,8 @@
     {
         "map1":
         {
-            "width":10,
-            "height":10,
+            "width":15,
+            "height":15,
             "enemies":[{"id":1,"position":[2,5]}, {"id":1,"position":[2,8]}],
             "obstacles":
             [

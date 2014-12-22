@@ -189,13 +189,11 @@ class MapView extends Sprite
     {
         var abilityId:Int = aData[0];
         var targetPosition:Point = aData[1];
-
         var value:Int = currentMap.get_value(cast(targetPosition.x, Int), cast(targetPosition.y, Int));
 
         if(value != 0)
         {
             EventBus.dispatch(EventTypes.UseAbilityApply, [abilityId, value]);
-            return;
         }
         else
         {

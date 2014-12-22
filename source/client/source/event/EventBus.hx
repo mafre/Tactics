@@ -21,6 +21,7 @@ enum EventTypes
     UpdateAbilities;
     UpdateAbility;
     CheckIfPositionIsAbilityTarget;
+    SetAbilityTarget;
     UpdateCharacterPosition;
     UpdateCharacterDirection;
     DealDamage;

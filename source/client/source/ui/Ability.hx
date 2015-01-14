@@ -102,7 +102,7 @@ class Ability extends Sprite
 
     public function rollOut(e:MouseEvent):Void
     {
-        if(!enabled)
+        if(!enabled || selected)
         {
             return;
         }

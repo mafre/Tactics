@@ -51,6 +51,8 @@ class Ability extends Sprite
         ok.visible = false;
 
 		addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
+        addEventListener(MouseEvent.ROLL_OVER, rollOver);
+        addEventListener(MouseEvent.ROLL_OUT, rollOut);
 
         EventBus.subscribe(EventTypes.UseAbilityApply, abilityApply);
         EventBus.subscribe(EventTypes.UpdateAbility, updateAbility);
@@ -87,6 +89,26 @@ class Ability extends Sprite
 
         setSelected(!selected);
 	}
+
+    public function rollOver(e:MouseEvent):Void
+    {
+        if(!enabled)
+        {
+            return;
+        }
+
+        EventBus.dispatch(EventTypes.GetAbilityTargets, id);
+    }
+
+    public function rollOut(e:MouseEvent):Void
+    {
+        if(!enabled)
+        {
+            return;
+        }
+
+        EventBus.dispatch(EventTypes.SelectOwnerOfAbility, id);
+    }
 
     private function useAbility(aId:Int):Void
     {

@@ -28,6 +28,12 @@ enum EventTypes
     TakeDamage;
     Defeated;
     BackgroundClicked;
+    SelectCharacterWithId;
+    SelectOwnerOfAbility;
+    GetAbilityTargets;
+    GetAbilityTargetsCheckOwnerPos;
+    GetAbilityTargetsCheckTiles;
+    ShowAbilityTargets;
     UseAbility;
     UseAbilityTargetTileSelected;
     UseAbilityApply;

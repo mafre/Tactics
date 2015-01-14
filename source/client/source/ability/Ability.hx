@@ -70,12 +70,22 @@ class Ability
             targetArea = AbilityTargetArea.Radius;
         }
 
+        EventBus.subscribe(EventTypes.GetAbilityTargets, getAbilityTargets);
         EventBus.subscribe(EventTypes.UseAbility, useAbility);
         EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
         EventBus.subscribe(EventTypes.DeselectCharacter, cancelAbility);
         EventBus.subscribe(EventTypes.UseAbilityApply, apply);
         EventBus.subscribe(EventTypes.GetAbilityPositionsResult, getAbilityPositionsResult);
+        EventBus.subscribe(EventTypes.SelectOwnerOfAbility, selectOwnerOfAbility);
 	};
+
+    private function selectOwnerOfAbility(aId:Int):Void
+    {
+        if(aId == id)
+        {
+            EventBus.dispatch(EventTypes.SelectCharacterWithId, ownerId);
+        }
+    }
 
     private function getAbilityPositionsResult(aData:Array<Dynamic>):Void
     {
@@ -105,8 +115,6 @@ class Ability
 
                         case AbilityTargetArea.VerticalHorizontal:
 
-                            trace(position.x + " " + characterPos.x);
-
                             if(position.x == characterPos.x || position.y == characterPos.y)
                             {
                                 withinRange = true;
@@ -119,6 +127,25 @@ class Ability
             }
 
             EventBus.dispatch(EventTypes.UpdateAbility, [id, withinRange]);
+        }
+    }
+
+    private function getAbilityTargets(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            EventBus.dispatch(EventTypes.GetAbilityTargetsCheckOwnerPos, [ownerId, targetArea, range]);
+        }
+    }
+
+    private function showAbilityTargets(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            for (pos in validPositions)
+            {
+                EventBus.dispatch(EventTypes.CheckIfPositionIsAbilityTarget, pos);
+            }
         }
     }
 

@@ -48,7 +48,52 @@ class MapView extends Sprite
         EventBus.subscribe(EventTypes.UseAbilityTargetTileSelected, useAbilityTargetTileSelected);
         EventBus.subscribe(EventTypes.Defeated, defeated);
         EventBus.subscribe(EventTypes.GetPath, getPath);
+        EventBus.subscribe(EventTypes.GetAbilityTargetsCheckTiles, getAbilityTargetsCheckTiles);
     };
+
+    private function getAbilityTargetsCheckTiles(aData:Array<Dynamic>):Void
+    {
+        var pos:Point = aData[0];
+        var targetArea:AbilityTargetArea = aData[1];
+        var range:Int = aData[2];
+        var distance:Int = 0;
+
+        for (x in 0...currentMap.get_width())
+        {
+            for (y in 0...currentMap.get_height())
+            {
+                distance = TileHelper.getDistanceBetweenPoint(pos, new Point(x, y));
+
+                if(distance <= range)
+                {
+                    switch(targetArea)
+                    {
+                        case AbilityTargetArea.Radius:
+
+                            EventBus.dispatch(EventTypes.ShowTargetTileWithPosition, new Point(x, y));
+
+                        case AbilityTargetArea.VerticalHorizontal:
+
+                            if(x == pos.x || y == pos.y)
+                            {
+                                EventBus.dispatch(EventTypes.ShowTargetTileWithPosition, new Point(x, y));
+                            }
+
+                        case AbilityTargetArea.Diagonal:
+                    }
+                }
+            };
+        };
+
+        switch(targetArea)
+        {
+            case AbilityTargetArea.Radius:
+
+            case AbilityTargetArea.Diagonal:
+
+            case AbilityTargetArea.VerticalHorizontal:
+        }
+    }
 
     public function loadMap(aId:Int):Void
     {

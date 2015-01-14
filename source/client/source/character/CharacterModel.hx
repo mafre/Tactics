@@ -112,6 +112,8 @@ class CharacterModel
 
         setLevel(1);
 
+        EventBus.subscribe(EventTypes.SelectCharacterWithId, selectCharacterWithId);
+        EventBus.subscribe(EventTypes.GetAbilityTargetsCheckOwnerPos, getAbilityTargetsCheckOwnerPos);
         EventBus.subscribe(EventTypes.SetActiveCharacter, setActiveCharacter);
         EventBus.subscribe(EventTypes.CharacterInitialized, characterInitialized);
         EventBus.subscribe(EventTypes.DeselectCharacter, deselectCharacter);
@@ -173,6 +175,15 @@ class CharacterModel
         if(id == sourceId)
         {
             EventBus.dispatch(EventTypes.ShowAbilityResultInfo, [id, "Angry"]);
+        }
+    }
+
+    private function selectCharacterWithId(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            EventBus.dispatch(EventTypes.DeselectCharacter);
+            EventBus.dispatch(EventTypes.SelectCharacter, [id, pos]);
         }
     }
 
@@ -250,6 +261,19 @@ class CharacterModel
             mov -= (path.length-1);
 
             EventBus.dispatch(EventTypes.UpdateCharacterMoves, getMovesText());
+        }
+    }
+
+    private function getAbilityTargetsCheckOwnerPos(aData:Array<Dynamic>):Void
+    {
+        var aId:Int = aData[0];
+
+        if(aId == id)
+        {
+            var targetArea:AbilityTargetArea = aData[1];
+            var range:Int = aData[2];
+
+            EventBus.dispatch(EventTypes.GetAbilityTargetsCheckTiles, [pos, targetArea, range]);
         }
     }
 

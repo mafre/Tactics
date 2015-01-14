@@ -105,7 +105,8 @@ class CharacterView extends TileBase
 
             case CharacterSelectState.Move:
 
-                selectCharacter(id);
+                EventBus.dispatch(EventTypes.DeselectCharacter);
+                EventBus.dispatch(EventTypes.SelectCharacter, [id, super.getPosition()]);
 
             case CharacterSelectState.AbilityTarget:
 

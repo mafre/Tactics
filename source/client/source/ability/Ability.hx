@@ -18,6 +18,13 @@ enum AbilityTargetType
     AllAllies;
 }
 
+enum AbilityTargetArea
+{
+    Radius;
+    VerticalHorizontal;
+    Diagonal;
+}
+
 class Ability
 {
 	public var id:Int;
@@ -26,9 +33,10 @@ class Ability
     public var range:Int;
     public var enabled:Bool;
     public var targetType:AbilityTargetType;
+    public var targetArea:AbilityTargetArea;
     public var validPositions:Array<Point>;
 
-	public function new(aOwnerId:Int, aAbilityType:String, ?aRange:Int, ?aTargetType:AbilityTargetType)
+	public function new(aOwnerId:Int, aAbilityType:String, ?aRange:Int, ?aTargetType:AbilityTargetType, ?aTargetArea:AbilityTargetArea)
 	{
         ownerId = aOwnerId;
         abilityType = aAbilityType;
@@ -53,26 +61,21 @@ class Ability
             targetType = AbilityTargetType.Enemy;
         }
 
+        if(aTargetArea != null)
+        {
+            targetArea = aTargetArea;
+        }
+        else
+        {
+            targetArea = AbilityTargetArea.Radius;
+        }
+
         EventBus.subscribe(EventTypes.UseAbility, useAbility);
         EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
         EventBus.subscribe(EventTypes.DeselectCharacter, cancelAbility);
         EventBus.subscribe(EventTypes.UseAbilityApply, apply);
         EventBus.subscribe(EventTypes.GetAbilityPositionsResult, getAbilityPositionsResult);
 	};
-
-    private function useAbility(aId:Int):Void
-    {
-        if(id == aId)
-        {
-            EventBus.subscribe(EventTypes.TargetSelected, targetSelected);
-            EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
-
-            for (pos in validPositions)
-            {
-                EventBus.dispatch(EventTypes.CheckIfPositionIsAbilityTarget, pos);
-            }
-        }
-    }
 
     private function getAbilityPositionsResult(aData:Array<Dynamic>):Void
     {
@@ -93,12 +96,43 @@ class Ability
 
                 if(range >= distance)
                 {
-                    withinRange = true;
-                    validPositions.push(position);
+                    switch(targetArea)
+                    {
+                        case AbilityTargetArea.Radius:
+
+                            withinRange = true;
+                            validPositions.push(position);
+
+                        case AbilityTargetArea.VerticalHorizontal:
+
+                            trace(position.x + " " + characterPos.x);
+
+                            if(position.x == characterPos.x || position.y == characterPos.y)
+                            {
+                                withinRange = true;
+                                validPositions.push(position);
+                            }
+
+                        case AbilityTargetArea.Diagonal:
+                    }
                 }
             }
 
             EventBus.dispatch(EventTypes.UpdateAbility, [id, withinRange]);
+        }
+    }
+
+    private function useAbility(aId:Int):Void
+    {
+        if(id == aId)
+        {
+            EventBus.subscribe(EventTypes.TargetSelected, targetSelected);
+            EventBus.subscribe(EventTypes.CancelAbility, cancelAbility);
+
+            for (pos in validPositions)
+            {
+                EventBus.dispatch(EventTypes.CheckIfPositionIsAbilityTarget, pos);
+            }
         }
     }
 

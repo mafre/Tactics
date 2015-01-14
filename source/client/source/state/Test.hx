@@ -59,7 +59,7 @@ class Test extends State
 
                 case CharacterType.Knight:
 
-                    addAbility(character.id, AbilityType.SWORD, 1);
+                    addAbility(character.id, AbilityType.SWORD, 3, AbilityTargetType.Enemy, AbilityTargetArea.VerticalHorizontal);
                     addAbility(character.id, AbilityType.SHIELD, null, AbilityTargetType.Self);
                     addAbility(character.id, AbilityType.TAUNT, 7);
 
@@ -87,9 +87,9 @@ class Test extends State
         StateHandler.getInstance().setStatePlay();
     };
 
-    private function addAbility(aCharacterId : Int , aAbilityType : String , ?aRange : Null<Int> , ?aTargetType : AbilityTargetType):Void
+    private function addAbility(aCharacterId : Int , aAbilityType : String , ?aRange : Null<Int> , ?aTargetType : AbilityTargetType, ?aTargetArea:AbilityTargetArea):Void
     {
-        var ability:Ability = new Ability(aCharacterId, aAbilityType, aRange, aTargetType);
+        var ability:Ability = new Ability(aCharacterId, aAbilityType, aRange, aTargetType, aTargetArea);
         AbilityHandler.getInstance().addAbility(ability);
     }
 }

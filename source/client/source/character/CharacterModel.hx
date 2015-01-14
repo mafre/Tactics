@@ -68,15 +68,11 @@ class CharacterModel
 
                 name = "Baldur";
                 path = "blacksmith";
-                str = 5;
-                vit = 20;
 
             case CharacterType.Berserk:
 
                 name = "Ljotur";
                 path = "berserk";
-                str = 5;
-                vit = 15;
 
             case CharacterType.Priest:
 
@@ -87,16 +83,11 @@ class CharacterModel
 
                 name = "Fantur";
                 path = "rogue";
-                agi = 20;
-                str = 5;
 
             case CharacterType.Knight:
 
                 name = "Trausti";
                 path = "knight";
-                str = 5;
-                vit = 15;
-                agi = 10;
 
             case CharacterType.Monk:
 
@@ -107,9 +98,6 @@ class CharacterModel
 
                 name = "Tjofur";
                 path = "thief";
-                agi = 30;
-                str = 5;
-                vit = 10;
 
             case CharacterType.Druid:
 
@@ -309,7 +297,7 @@ class CharacterModel
 
 	public function getMaxHP():Int
 	{
-		return Math.floor(10*lvl*Math.pow(1.01, vit));
+		return 10*lvl+Math.floor(Math.pow(1.01, vit));
 	}
 
 	public function getMaxSP():Int

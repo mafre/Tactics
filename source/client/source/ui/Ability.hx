@@ -97,6 +97,7 @@ class Ability extends Sprite
             return;
         }
 
+        EventBus.dispatch(EventTypes.HideTargetTiles);
         EventBus.dispatch(EventTypes.GetAbilityTargets, id);
     }
 
